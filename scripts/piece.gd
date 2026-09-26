@@ -8,7 +8,7 @@ signal moved
 @export var id: StringName = &"pip"
 
 const OBJECT_COLORS := {
-	&"pip": Color(0.561, 0.337, 0.231),
+	&"pip": Color(0.851, 0.341, 0.388),
 	&"acorn": Color(0.55, 0.32, 0.14),
 	&"bush": Color(0.28, 0.48, 0.22),
 	&"leaf": Color(0.92, 0.48, 0.18),
@@ -16,7 +16,7 @@ const OBJECT_COLORS := {
 }
 
 const WORD_COLORS := {
-	&"pip": Color(0.561, 0.337, 0.231),
+	&"pip": Color(0.851, 0.341, 0.388),
 	&"acorn": Color(0.55, 0.32, 0.14),
 	&"bush": Color(0.28, 0.48, 0.22),
 	&"leaf": Color(0.92, 0.48, 0.18),
