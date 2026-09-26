@@ -14,6 +14,9 @@ const HOLD_REPEAT_DELAY := 0.28
 @onready var tile_map: TileMapLayer = $TileMap
 @onready var pieces_root: Node2D = $Pieces
 
+## Dirt footprints behind YOU. Off by default — flip on in the inspector.
+@export var move_trail_enabled: bool = false
+
 var rules := RuleBook.new()
 var pieces: Array[Piece] = []
 var _held: Array[StringName] = []
@@ -23,6 +26,7 @@ var _busy := false
 var _won := false
 var _history: Array = []
 var _origin := Vector2i.ZERO
+var _move_trail: MoveTrail
 
 const DIRECTIONS := {
 	&"move_right": Vector2i.RIGHT,
@@ -34,11 +38,12 @@ const DIRECTIONS := {
 
 func _ready() -> void:
 	pieces_root.z_index = 2
-	var trail := MoveTrail.new()
-	add_child(trail)
+	_move_trail = MoveTrail.new()
+	add_child(_move_trail)
 	# Trail must stay behind pieces in the tree as well as via z_index.
-	move_child(trail, 0)
-	trail.setup(self)
+	move_child(_move_trail, 0)
+	_move_trail.setup(self)
+	_move_trail.set_trail_enabled(move_trail_enabled)
 	_build_from_tilemap()
 	_refresh_rules()
 	rules_changed.emit(rules.describe())

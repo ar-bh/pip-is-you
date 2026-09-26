@@ -3,6 +3,8 @@ extends Node2D
 ## Loads TileMap levels in order. Paint new levels under res://levels/.
 
 @export var levels: Array[PackedScene] = []
+## Dirt footprints behind YOU. Off by default.
+@export var move_trail_enabled: bool = false
 
 @onready var level_host: Node2D = $LevelHost
 @onready var rules_label: Label = $UI/RulesLabel
@@ -54,6 +56,7 @@ func _load_current() -> void:
 		win_label.visible = true
 		return
 	_level = levels[_index].instantiate()
+	_level.move_trail_enabled = move_trail_enabled
 	level_host.add_child(_level)
 	_level.won.connect(_on_level_won)
 	_level.rules_changed.connect(_on_rules_changed)

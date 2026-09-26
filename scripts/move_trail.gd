@@ -1,20 +1,30 @@
 class_name MoveTrail
 extends Node2D
 
-## Permanent path under YOU. All bottoms, then all tops (highlights always visible).
+## Path under YOU. Tops always above bottoms; stamps fade out over time.
 
 const BOTTOM_TEX := preload("res://tiles/bottom_trail.png")
 const TOP_TEX := preload("res://tiles/trail_top.png")
+
+@export var enabled: bool = false:
+	set(value):
+		enabled = value
+		if not enabled:
+			_stamps.clear()
+			_last_drop.clear()
+			queue_redraw()
 
 @export var drop_distance: float = 10.0
 @export var min_scale: float = 1.6
 @export var max_scale: float = 2.8
 @export var y_offset: float = 14.0
+@export var lifetime: float = 3.2
+@export var fade_start: float = 1.6
 
 var _level: Level
 var _last_drop: Dictionary = {} # Piece -> Vector2
 var _rng := RandomNumberGenerator.new()
-## Each entry: { pos, rot, scale, top_pos, top_rot, top_scale }
+## Each entry: { pos, rot, scale, top_pos, top_rot, top_scale, age, life }
 var _stamps: Array[Dictionary] = []
 
 
@@ -26,26 +36,62 @@ func setup(level: Level) -> void:
 	z_index = -1
 	y_sort_enabled = false
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	set_process(enabled)
 	queue_redraw()
 
 
-func _process(_delta: float) -> void:
-	if _level == null or not is_instance_valid(_level):
+func set_trail_enabled(on: bool) -> void:
+	enabled = on
+	set_process(on)
+	if not on:
+		_stamps.clear()
+		_last_drop.clear()
+		queue_redraw()
+
+
+func _process(delta: float) -> void:
+	if not enabled or _level == null or not is_instance_valid(_level):
 		return
 	for piece in _level.get_you_pieces():
 		_track(piece)
+	_age_stamps(delta)
 
 
 func _draw() -> void:
+	if not enabled or _stamps.is_empty():
+		return
 	var bottom_half := BOTTOM_TEX.get_size() * 0.5
 	var top_half := TOP_TEX.get_size() * 0.5
 	for stamp in _stamps:
+		var col := Color(1, 1, 1, _stamp_alpha(stamp))
 		draw_set_transform(stamp.pos, stamp.rot, stamp.scale)
-		draw_texture(BOTTOM_TEX, -bottom_half)
+		draw_texture(BOTTOM_TEX, -bottom_half, col)
 	for stamp in _stamps:
+		var col := Color(1, 1, 1, _stamp_alpha(stamp))
 		draw_set_transform(stamp.top_pos, stamp.top_rot, stamp.top_scale)
-		draw_texture(TOP_TEX, -top_half)
+		draw_texture(TOP_TEX, -top_half, col)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _stamp_alpha(stamp: Dictionary) -> float:
+	var age: float = stamp.age
+	var life: float = stamp.life
+	var fade_at: float = minf(fade_start, life * 0.55)
+	if age <= fade_at:
+		return 1.0
+	return 1.0 - clampf((age - fade_at) / maxf(life - fade_at, 0.001), 0.0, 1.0)
+
+
+func _age_stamps(delta: float) -> void:
+	if _stamps.is_empty():
+		return
+	var alive: Array[Dictionary] = []
+	for stamp in _stamps:
+		stamp.age = float(stamp.age) + delta
+		if stamp.age < stamp.life:
+			alive.append(stamp)
+	_stamps = alive
+	queue_redraw()
 
 
 func _track(piece: Piece) -> void:
@@ -77,5 +123,7 @@ func _drop(at: Vector2) -> void:
 		"top_pos": origin + Vector2(_rng.randf_range(-2.0, 2.0), _rng.randf_range(-2.0, 2.0)),
 		"top_rot": rot + _rng.randf_range(-0.15, 0.15),
 		"top_scale": Vector2(top_s, top_s * _rng.randf_range(0.9, 1.05)),
+		"age": 0.0,
+		"life": lifetime * _rng.randf_range(0.85, 1.2),
 	})
 	queue_redraw()
