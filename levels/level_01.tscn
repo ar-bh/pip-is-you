@@ -1,0 +1,17 @@
+[gd_scene format=4]
+
+[ext_resource type="Script" path="res://scripts/level.gd" id="1_81a5f"]
+[ext_resource type="Script" path="res://scripts/board.gd" id="2_gg43x"]
+[ext_resource type="TileSet" path="res://tiles/piece_tileset.tres" id="3_mllcm"]
+
+[node name="Level01" type="Node2D" unique_id=2089078812]
+script = ExtResource("1_81a5f")
+
+[node name="Board" type="Node2D" parent="." unique_id=1604006610]
+script = ExtResource("2_gg43x")
+
+[node name="TileMap" type="TileMapLayer" parent="." unique_id=122690828]
+tile_map_data = PackedByteArray("AAAAAAAA//////////8AAAkA//////////8BAAAA//////////8BAAkA//////////8CAAAA//////////8CAAkA//////////8DAAAA//////////8DAAkA//////////8EAAAA//////////8EAAkA//////////8FAAAA//////////8FAAkA//////////8GAAAA//////////8GAAkA//////////8HAAAA//////////8HAAkA//////////8IAAAA//////////8IAAkA//////////8JAAAA//////////8JAAkA//////////8KAAAA//////////8KAAkA//////////8LAAAA//////////8LAAkA//////////8MAAAA//////////8MAAkA//////////8NAAAA//////////8NAAkA//////////8OAAAA//////////8OAAkA//////////8AAAEA//////////8OAAEA//////////8AAAIA//////////8OAAIA//////////8AAAMA//////////8OAAMA//////////8AAAQA//////////8OAAQA//////////8AAAUA//////////8OAAUA//////////8AAAYA//////////8OAAYA//////////8AAAcA//////////8OAAcA//////////8AAAgA//////////8OAAgA//////////8DAAQAAAABAAAAAAALAAQAAAACAAAAAAAEAAQAAAAFAAAAAAAEAAUAAAAJAAAAAAAEAAYAAAAKAAAAAAAKAAQAAAAGAAAAAAAKAAUAAAAJAAAAAAAKAAYAAAALAAAAAAA=")
+tile_set = ExtResource("3_mllcm")
+
+[node name="Pieces" type="Node2D" parent="." unique_id=809543884]
