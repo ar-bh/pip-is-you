@@ -145,6 +145,9 @@ func _try_turn(direction: Vector2i) -> void:
 	_busy = true
 	_history.append(_snapshot())
 	var moved: Dictionary = {}
+	var you_set: Dictionary = {}
+	for you in yous:
+		you_set[you] = true
 	for entry in plan:
 		var piece: Piece = entry.piece
 		if moved.has(piece):
@@ -153,6 +156,8 @@ func _try_turn(direction: Vector2i) -> void:
 		piece.cell = entry.to
 
 	for piece: Piece in moved.keys():
+		if you_set.has(piece):
+			piece.set_facing(direction)
 		piece.animate_to_cell(STEP_DURATION)
 	await get_tree().create_timer(STEP_DURATION).timeout
 	_busy = false

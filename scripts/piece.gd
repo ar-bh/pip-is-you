@@ -8,7 +8,7 @@ signal moved
 @export var id: StringName = &"pip"
 
 const OBJECT_COLORS := {
-	&"pip": Color(0.86, 0.45, 0.22),
+	&"pip": Color(0.561, 0.337, 0.231),
 	&"acorn": Color(0.55, 0.32, 0.14),
 	&"bush": Color(0.28, 0.48, 0.22),
 	&"leaf": Color(0.92, 0.48, 0.18),
@@ -16,7 +16,7 @@ const OBJECT_COLORS := {
 }
 
 const WORD_COLORS := {
-	&"pip": Color(0.86, 0.45, 0.22),
+	&"pip": Color(0.561, 0.337, 0.231),
 	&"acorn": Color(0.55, 0.32, 0.14),
 	&"bush": Color(0.28, 0.48, 0.22),
 	&"leaf": Color(0.92, 0.48, 0.18),
@@ -36,18 +36,34 @@ const SPRITES := {
 	"win|1": preload("res://tiles/win_text.png"),
 }
 
+const PIP_DIR := {
+	Vector2i.DOWN: preload("res://tiles/pip_down.png"),
+	Vector2i.UP: preload("res://tiles/pip_up.png"),
+	Vector2i.RIGHT: preload("res://tiles/pip_right.png"),
+	Vector2i.LEFT: preload("res://tiles/pip_right.png"),
+}
+
 var _board: Board
+var _sprite: Sprite2D
+var facing: Vector2i = Vector2i.DOWN
 
 func setup(board: Board, at: Vector2i, text: bool, piece_id: StringName) -> void:
 	_board = board
 	cell = at
 	is_text = text
 	id = piece_id
+	facing = Vector2i.DOWN
 	_build_visual()
 	snap_to_cell()
 
 func snap_to_cell() -> void:
 	position = _board.cell_center(cell)
+
+func set_facing(direction: Vector2i) -> void:
+	if direction == Vector2i.ZERO or not _has_directional_art():
+		return
+	facing = direction
+	_apply_facing()
 
 func animate_to_cell(duration: float) -> void:
 	var tween := create_tween()
@@ -63,24 +79,55 @@ func display_name() -> String:
 		return "#"
 	return String(id).to_upper()
 
+func _has_directional_art() -> bool:
+	return not is_text and id == &"pip"
+
 func _sprite_key() -> String:
 	return "%s|%d" % [String(id), 1 if is_text else 0]
 
-func _build_visual() -> void:
+func _apply_facing() -> void:
+	if _sprite == null or not _has_directional_art():
+		return
+	var dir := facing
+	if not PIP_DIR.has(dir):
+		dir = Vector2i.DOWN
+	_sprite.texture = PIP_DIR[dir]
+	_sprite.flip_h = dir == Vector2i.LEFT
+	_fit_sprite(_sprite)
+
+func _fit_sprite(sprite: Sprite2D) -> void:
 	var size := float(_board.cell_size)
-	var key := _sprite_key()
-	if SPRITES.has(key):
-		var sprite := Sprite2D.new()
-		sprite.texture = SPRITES[key]
-		sprite.centered = true
-		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		var tex_size: Vector2 = sprite.texture.get_size()
-		var longest := maxf(tex_size.x, tex_size.y)
-		if longest > 0.0:
-			sprite.scale = Vector2.ONE * (size / longest)
-		add_child(sprite)
+	var tex_size: Vector2 = sprite.texture.get_size()
+	var longest := maxf(tex_size.x, tex_size.y)
+	if longest > 0.0:
+		sprite.scale = Vector2.ONE * (size / longest)
+
+func _make_sprite(tex: Texture2D) -> Sprite2D:
+	var sprite := Sprite2D.new()
+	sprite.texture = tex
+	sprite.centered = true
+	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	_fit_sprite(sprite)
+	return sprite
+
+func _build_visual() -> void:
+	for child in get_children():
+		child.queue_free()
+	_sprite = null
+
+	if _has_directional_art():
+		_sprite = _make_sprite(PIP_DIR[Vector2i.DOWN])
+		add_child(_sprite)
+		_apply_facing()
 		return
 
+	var key := _sprite_key()
+	if SPRITES.has(key):
+		_sprite = _make_sprite(SPRITES[key])
+		add_child(_sprite)
+		return
+
+	var size := float(_board.cell_size)
 	var pad := size * 0.08
 	var body := ColorRect.new()
 	body.position = Vector2(-size * 0.5 + pad, -size * 0.5 + pad)
