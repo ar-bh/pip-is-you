@@ -1,8 +1,6 @@
 class_name Level
 extends Node2D
 
-## A puzzle built from a TileMap. Paint tiles in the editor; play reads them at runtime.
-
 signal won
 signal rules_changed(text: String)
 
@@ -14,8 +12,8 @@ const HOLD_REPEAT_DELAY := 0.28
 @onready var tile_map: TileMapLayer = $TileMap
 @onready var pieces_root: Node2D = $Pieces
 
-## Dirt footprints behind YOU. Off by default — flip on in the inspector.
 @export var move_trail_enabled: bool = false
+@export var move_trail_fade_enabled: bool = false
 
 var rules := RuleBook.new()
 var pieces: Array[Piece] = []
@@ -35,27 +33,23 @@ const DIRECTIONS := {
 	&"move_down": Vector2i.DOWN,
 }
 
-
 func _ready() -> void:
 	pieces_root.z_index = 2
 	_move_trail = MoveTrail.new()
 	add_child(_move_trail)
-	# Trail must stay behind pieces in the tree as well as via z_index.
 	move_child(_move_trail, 0)
 	_move_trail.setup(self)
 	_move_trail.set_trail_enabled(move_trail_enabled)
+	_move_trail.set_fade_enabled(move_trail_fade_enabled)
 	_build_from_tilemap()
 	_refresh_rules()
 	rules_changed.emit(rules.describe())
 
-
 func is_busy() -> bool:
 	return _busy
 
-
 func has_won() -> bool:
 	return _won
-
 
 func handle_input(event: InputEvent) -> bool:
 	if event.is_action_pressed("undo"):
@@ -82,7 +76,6 @@ func handle_input(event: InputEvent) -> bool:
 		return true
 	return false
 
-
 func tick(delta: float) -> void:
 	if _won or _busy:
 		return
@@ -101,13 +94,11 @@ func tick(delta: float) -> void:
 		_repeat_clock = 0.0
 		_try_turn(direction)
 
-
 func _build_from_tilemap() -> void:
 	for piece in pieces:
 		piece.queue_free()
 	pieces.clear()
 
-	# Playable area is the Board size — edges block movement, no wall tiles needed.
 	_origin = Vector2i.ZERO
 	tile_map.visible = false
 
@@ -128,7 +119,6 @@ func _build_from_tilemap() -> void:
 		if piece_id == &"" or piece_id == &"wall":
 			continue
 		_spawn(cell, is_text, piece_id)
-
 
 func _try_turn(direction: Vector2i) -> void:
 	if _busy or _won or direction == Vector2i.ZERO:
@@ -170,7 +160,6 @@ func _try_turn(direction: Vector2i) -> void:
 	rules_changed.emit(rules.describe())
 	_check_win()
 
-
 func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
 	var chain: Array[Piece] = []
 	var cell := start
@@ -198,7 +187,6 @@ func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
 			return null
 
 		if not pushables.is_empty():
-			# Word (or PUSH) tiles move, and any object sharing the cell comes along.
 			chain.append_array(pushables)
 			chain.append_array(softs)
 			cell += direction
@@ -208,14 +196,11 @@ func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
 			return chain
 
 		if chain.is_empty():
-			# Walking onto a plain object (no STOP/PUSH) — overlap, don't shove it.
 			return chain
 
-		# Something is already being pushed into this object — shove the object too.
 		chain.append_array(softs)
 		cell += direction
 	return null
-
 
 func _pieces_at(cell: Vector2i) -> Array[Piece]:
 	var found: Array[Piece] = []
@@ -224,10 +209,8 @@ func _pieces_at(cell: Vector2i) -> Array[Piece]:
 			found.append(piece)
 	return found
 
-
 func get_you_pieces() -> Array[Piece]:
 	return _yous()
-
 
 func _yous() -> Array[Piece]:
 	var found: Array[Piece] = []
@@ -236,13 +219,10 @@ func _yous() -> Array[Piece]:
 			found.append(piece)
 	return found
 
-
 func _refresh_rules() -> void:
 	rules.rebuild(pieces)
 
-
 func _check_win() -> void:
-	# Touch = stand on an orthogonal neighbor of something that is WIN (usually the acorn).
 	var dirs: Array[Vector2i] = [
 		Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT,
 	]
@@ -254,13 +234,11 @@ func _check_win() -> void:
 					won.emit()
 					return
 
-
 func _snapshot() -> Array:
 	var cells: Array[Vector2i] = []
 	for piece in pieces:
 		cells.append(piece.cell)
 	return cells
-
 
 func _undo() -> void:
 	if _history.is_empty() or _busy:
@@ -284,14 +262,12 @@ func _undo() -> void:
 	_refresh_rules()
 	rules_changed.emit(rules.describe())
 
-
 func _spawn(cell: Vector2i, is_text: bool, id: StringName) -> Piece:
 	var piece: Piece = PieceScene.instantiate()
 	pieces_root.add_child(piece)
 	piece.setup(board, cell, is_text, id)
 	pieces.append(piece)
 	return piece
-
 
 func _held_direction() -> Vector2i:
 	for i in range(_held.size() - 1, -1, -1):

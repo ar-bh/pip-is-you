@@ -1,8 +1,6 @@
 class_name MoveTrail
 extends Node2D
 
-## Path under YOU. Tops always above bottoms; stamps fade out over time.
-
 const BOTTOM_TEX := preload("res://tiles/bottom_trail.png")
 const TOP_TEX := preload("res://tiles/trail_top.png")
 
@@ -14,6 +12,7 @@ const TOP_TEX := preload("res://tiles/trail_top.png")
 			_last_drop.clear()
 			queue_redraw()
 
+@export var fade_enabled: bool = false
 @export var drop_distance: float = 10.0
 @export var min_scale: float = 1.6
 @export var max_scale: float = 2.8
@@ -22,11 +21,9 @@ const TOP_TEX := preload("res://tiles/trail_top.png")
 @export var fade_start: float = 1.6
 
 var _level: Level
-var _last_drop: Dictionary = {} # Piece -> Vector2
+var _last_drop: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
-## Each entry: { pos, rot, scale, top_pos, top_rot, top_scale, age, life }
 var _stamps: Array[Dictionary] = []
-
 
 func setup(level: Level) -> void:
 	_level = level
@@ -39,7 +36,6 @@ func setup(level: Level) -> void:
 	set_process(enabled)
 	queue_redraw()
 
-
 func set_trail_enabled(on: bool) -> void:
 	enabled = on
 	set_process(on)
@@ -48,14 +44,20 @@ func set_trail_enabled(on: bool) -> void:
 		_last_drop.clear()
 		queue_redraw()
 
+func set_fade_enabled(on: bool) -> void:
+	fade_enabled = on
+	if not fade_enabled:
+		for stamp in _stamps:
+			stamp.age = 0.0
+		queue_redraw()
 
 func _process(delta: float) -> void:
 	if not enabled or _level == null or not is_instance_valid(_level):
 		return
 	for piece in _level.get_you_pieces():
 		_track(piece)
-	_age_stamps(delta)
-
+	if fade_enabled:
+		_age_stamps(delta)
 
 func _draw() -> void:
 	if not enabled or _stamps.is_empty():
@@ -72,15 +74,15 @@ func _draw() -> void:
 		draw_texture(TOP_TEX, -top_half, col)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-
 func _stamp_alpha(stamp: Dictionary) -> float:
+	if not fade_enabled:
+		return 1.0
 	var age: float = stamp.age
 	var life: float = stamp.life
 	var fade_at: float = minf(fade_start, life * 0.55)
 	if age <= fade_at:
 		return 1.0
 	return 1.0 - clampf((age - fade_at) / maxf(life - fade_at, 0.001), 0.0, 1.0)
-
 
 func _age_stamps(delta: float) -> void:
 	if _stamps.is_empty():
@@ -92,7 +94,6 @@ func _age_stamps(delta: float) -> void:
 			alive.append(stamp)
 	_stamps = alive
 	queue_redraw()
-
 
 func _track(piece: Piece) -> void:
 	var pos := piece.position + Vector2(0.0, y_offset)
@@ -108,7 +109,6 @@ func _track(piece: Piece) -> void:
 		var t := float(i) / float(steps)
 		_drop(prev.lerp(pos, t))
 	_last_drop[piece] = pos
-
 
 func _drop(at: Vector2) -> void:
 	var origin := at + Vector2(_rng.randf_range(-6.0, 6.0), _rng.randf_range(-4.0, 4.0))

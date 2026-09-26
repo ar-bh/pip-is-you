@@ -1,7 +1,5 @@
 extends Node2D
 
-## Soft autumn leaves drifting across the viewport.
-
 @export var leaf_count: int = 26
 @export var min_scale: float = 0.18
 @export var max_scale: float = 0.38
@@ -13,14 +11,12 @@ var _leaves: Array[Dictionary] = []
 var _textures: Array[Texture2D] = []
 var _rng := RandomNumberGenerator.new()
 
-
 func _ready() -> void:
 	_rng.randomize()
 	_load_textures()
 	for i in leaf_count:
 		_spawn_leaf(true)
 	get_viewport().size_changed.connect(_on_viewport_resized)
-
 
 func _process(delta: float) -> void:
 	var view := get_viewport().get_visible_rect().size
@@ -36,7 +32,6 @@ func _process(delta: float) -> void:
 		if spr.position.y > view.y + 48.0:
 			_reset_leaf(leaf, view, true)
 
-
 func _load_textures() -> void:
 	for i in 12:
 		var path := "res://tiles/autumn/leaves/leaf_%02d.png" % i
@@ -44,7 +39,6 @@ func _load_textures() -> void:
 		if ResourceLoader.exists(path):
 			tex = load(path) as Texture2D
 		if tex == null:
-			# First run before Godot finishes importing: load pixels directly.
 			var img := Image.load_from_file(ProjectSettings.globalize_path(path))
 			if img:
 				tex = ImageTexture.create_from_image(img)
@@ -52,7 +46,6 @@ func _load_textures() -> void:
 			_textures.append(tex)
 	if _textures.is_empty():
 		push_warning("No leaf textures found under tiles/autumn/leaves/")
-
 
 func _spawn_leaf(scattered: bool) -> void:
 	if _textures.is_empty():
@@ -74,7 +67,6 @@ func _spawn_leaf(scattered: bool) -> void:
 	_leaves.append(leaf)
 	_reset_leaf(leaf, get_viewport().get_visible_rect().size, not scattered)
 
-
 func _reset_leaf(leaf: Dictionary, view: Vector2, from_top: bool) -> void:
 	var spr: Sprite2D = leaf.sprite
 	spr.texture = _textures[_rng.randi_range(0, _textures.size() - 1)]
@@ -91,7 +83,6 @@ func _reset_leaf(leaf: Dictionary, view: Vector2, from_top: bool) -> void:
 		spr.position.y = _rng.randf_range(-120.0, -20.0)
 	else:
 		spr.position.y = _rng.randf_range(-80.0, view.y)
-
 
 func _on_viewport_resized() -> void:
 	var view := get_viewport().get_visible_rect().size

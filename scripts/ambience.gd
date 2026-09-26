@@ -1,18 +1,16 @@
 extends CanvasLayer
 
-## Full-window tiled grass.
-
 @onready var ground: ColorRect = $Ground
-
 
 func _ready() -> void:
 	layer = -10
 	var peach := Color(0.965, 0.627, 0.412, 1.0)
 	RenderingServer.set_default_clear_color(peach)
+	ground.color = peach
+	ground.material = null
 	_fit()
 	get_viewport().size_changed.connect(_fit)
 	get_tree().root.size_changed.connect(_fit)
-
 
 func _fit() -> void:
 	ground.set_anchors_preset(Control.PRESET_FULL_RECT)

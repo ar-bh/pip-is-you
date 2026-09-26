@@ -1,34 +1,25 @@
 class_name RuleBook
 extends RefCounted
 
-## Active sentences found on the board, like PIP IS YOU or BUSH IS STOP.
-
-var properties: Dictionary = {} ## StringName noun -> Dictionary of StringName property -> true
-
+var properties: Dictionary = {}
 
 func clear() -> void:
 	properties.clear()
-
 
 func set_property(noun: StringName, property: StringName) -> void:
 	if not properties.has(noun):
 		properties[noun] = {}
 	properties[noun][property] = true
 
-
 func has_property(noun: StringName, property: StringName) -> bool:
 	return properties.has(noun) and properties[noun].has(property)
 
-
 func piece_has(piece: Piece, property: StringName) -> bool:
 	if piece.is_text:
-		# Word blocks are always pushable, like Baba text.
 		return property == &"push"
-	# Physical acorn is pushable — unless it is YOU (then it walks itself).
 	if piece.id == &"acorn" and property == &"push" and not has_property(&"acorn", &"you"):
 		return true
 	return has_property(piece.id, property)
-
 
 func rebuild(pieces: Array) -> void:
 	clear()
@@ -43,10 +34,8 @@ func rebuild(pieces: Array) -> void:
 
 	_scan_lines(by_cell, true)
 	_scan_lines(by_cell, false)
-	# L-shapes like YOU IS ACORN also count as controlling that noun.
 	_scan_you_is_noun(by_cell, true)
 	_scan_you_is_noun(by_cell, false)
-
 
 func _scan_lines(by_cell: Dictionary, horizontal: bool) -> void:
 	var cells: Array = by_cell.keys()
@@ -64,7 +53,6 @@ func _scan_lines(by_cell: Dictionary, horizontal: bool) -> void:
 			continue
 		set_property(first.id, property.id)
 
-
 func _scan_you_is_noun(by_cell: Dictionary, horizontal: bool) -> void:
 	var step := Vector2i.RIGHT if horizontal else Vector2i.DOWN
 	for cell: Vector2i in by_cell.keys():
@@ -77,7 +65,6 @@ func _scan_you_is_noun(by_cell: Dictionary, horizontal: bool) -> void:
 			continue
 		set_property(noun.id, &"you")
 
-
 func _noun_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 	if not by_cell.has(cell):
 		return null
@@ -85,7 +72,6 @@ func _noun_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 		if piece.id in [&"pip", &"acorn", &"bush", &"leaf"]:
 			return piece
 	return null
-
 
 func _word_at(by_cell: Dictionary, cell: Vector2i, word: StringName) -> Piece:
 	if not by_cell.has(cell):
@@ -95,7 +81,6 @@ func _word_at(by_cell: Dictionary, cell: Vector2i, word: StringName) -> Piece:
 			return piece
 	return null
 
-
 func _property_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 	if not by_cell.has(cell):
 		return null
@@ -103,7 +88,6 @@ func _property_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 		if piece.id in [&"you", &"win", &"stop", &"push"]:
 			return piece
 	return null
-
 
 func describe() -> String:
 	var lines: PackedStringArray = []

@@ -1,8 +1,6 @@
 class_name Piece
 extends Node2D
 
-## One tile on the board: forest object or word block.
-
 signal moved
 
 @export var cell: Vector2i
@@ -29,7 +27,6 @@ const WORD_COLORS := {
 	&"push": Color(0.45, 0.75, 0.55),
 }
 
-## Real art when available. Key = "id|1" for text, "id|0" for object.
 const SPRITES := {
 	"acorn|0": preload("res://tiles/acorn.png"),
 	"acorn|1": preload("res://tiles/acorn_text.png"),
@@ -41,7 +38,6 @@ const SPRITES := {
 
 var _board: Board
 
-
 func setup(board: Board, at: Vector2i, text: bool, piece_id: StringName) -> void:
 	_board = board
 	cell = at
@@ -50,10 +46,8 @@ func setup(board: Board, at: Vector2i, text: bool, piece_id: StringName) -> void
 	_build_visual()
 	snap_to_cell()
 
-
 func snap_to_cell() -> void:
 	position = _board.cell_center(cell)
-
 
 func animate_to_cell(duration: float) -> void:
 	var tween := create_tween()
@@ -64,16 +58,13 @@ func animate_to_cell(duration: float) -> void:
 		moved.emit()
 	)
 
-
 func display_name() -> String:
 	if id == &"wall":
 		return "#"
 	return String(id).to_upper()
 
-
 func _sprite_key() -> String:
 	return "%s|%d" % [String(id), 1 if is_text else 0]
-
 
 func _build_visual() -> void:
 	var size := float(_board.cell_size)
