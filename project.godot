@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 window/size/viewport_width=960
 window/size/viewport_height=640
 window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
 
 [input]
 
@@ -67,4 +68,4 @@ undo={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-environment/defaults/default_clear_color=Color(0, 0, 0, 1)
+environment/defaults/default_clear_color=Color(0.965, 0.627, 0.412, 1)

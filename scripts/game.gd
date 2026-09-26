@@ -20,6 +20,7 @@ func _ready() -> void:
 			load("res://levels/level_01.tscn"),
 			load("res://levels/level_02.tscn"),
 		]
+	get_viewport().size_changed.connect(_center_level)
 	_load_current()
 
 
@@ -60,6 +61,20 @@ func _load_current() -> void:
 	win_label.visible = false
 	level_label.text = "Level %d / %d" % [_index + 1, levels.size()]
 	hint_label.text = "Arrows / WASD · Z undo · R restart\nPaint levels with tiles/piece_tileset.tres"
+	# Wait one frame so Board exports are ready, then center.
+	await get_tree().process_frame
+	_center_level()
+
+
+func _center_level() -> void:
+	if _level == null or not is_instance_valid(_level):
+		return
+	var board: Board = _level.get_node_or_null("Board") as Board
+	if board == null:
+		return
+	var board_size := Vector2(board.columns * board.cell_size, board.rows * board.cell_size)
+	var view := get_viewport().get_visible_rect().size
+	level_host.position = ((view - board_size) * 0.5).floor()
 
 
 func _next_level() -> void:

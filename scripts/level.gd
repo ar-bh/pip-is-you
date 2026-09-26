@@ -33,6 +33,12 @@ const DIRECTIONS := {
 
 
 func _ready() -> void:
+	pieces_root.z_index = 2
+	var trail := MoveTrail.new()
+	add_child(trail)
+	# Trail must stay behind pieces in the tree as well as via z_index.
+	move_child(trail, 0)
+	trail.setup(self)
 	_build_from_tilemap()
 	_refresh_rules()
 	rules_changed.emit(rules.describe())
@@ -212,6 +218,10 @@ func _pieces_at(cell: Vector2i) -> Array[Piece]:
 		if piece.cell == cell:
 			found.append(piece)
 	return found
+
+
+func get_you_pieces() -> Array[Piece]:
+	return _yous()
 
 
 func _yous() -> Array[Piece]:
