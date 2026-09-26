@@ -1,11 +1,24 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://levels/level_01.tscn" id="2_level1"]
 [ext_resource type="PackedScene" path="res://levels/level_02.tscn" id="3_level2"]
 [ext_resource type="Script" path="res://scripts/ambience.gd" id="4_ambience"]
+[ext_resource type="Texture2D" uid="uid://beyh60jqhpfdb" path="res://tiles/grass.png" id="5_ground"]
+[ext_resource type="Shader" path="res://shaders/grass_wind.gdshader" id="6_wind"]
 [ext_resource type="Script" path="res://scripts/falling_leaves.gd" id="7_leaves"]
 [ext_resource type="Script" path="res://scripts/autumn_scenery.gd" id="8_scenery"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
+shader = ExtResource("6_wind")
+shader_parameter/grass_tex = ExtResource("5_ground")
+shader_parameter/base_color = Color(0.965, 0.627, 0.412, 1)
+shader_parameter/tiles_x = 16.0
+shader_parameter/tiles_y = 11.0
+shader_parameter/wind_speed = 0.4
+shader_parameter/wind_strength_px = 1.5
+shader_parameter/wind_scale = 14.0
+shader_parameter/texture_mix = 0.55
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -16,6 +29,7 @@ layer = -10
 script = ExtResource("4_ambience")
 
 [node name="Ground" type="ColorRect" parent="Ambience"]
+material = SubResource("ShaderMaterial_grass")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
