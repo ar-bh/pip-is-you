@@ -129,7 +129,7 @@ func _place_rocks(
 			continue
 		if _too_close(parent, pos, radius, min_sep):
 			continue
-		var spr := _make_sprite(ROCK, pos, s, Color.WHITE, false)
+		var spr := _make_sprite(ROCK, pos, s, Color.WHITE, true, true)
 		parent.add_child(spr)
 		placed += 1
 
@@ -143,7 +143,14 @@ func _too_close(parent: Node2D, pos: Vector2, radius: float, min_sep: float) -> 
 			return true
 	return false
 
-func _make_sprite(tex: Texture2D, pos: Vector2, s: float, modulate: Color, apply_wind: bool) -> Sprite2D:
+func _make_sprite(
+	tex: Texture2D,
+	pos: Vector2,
+	s: float,
+	modulate: Color,
+	apply_wind: bool,
+	is_rock: bool = false,
+) -> Sprite2D:
 	var spr := Sprite2D.new()
 	spr.texture = tex
 	spr.centered = true
@@ -157,8 +164,16 @@ func _make_sprite(tex: Texture2D, pos: Vector2, s: float, modulate: Color, apply
 		var mat := ShaderMaterial.new()
 		mat.shader = PROP_WIND
 		mat.set_shader_parameter("phase", _rng.randf() * TAU)
-		mat.set_shader_parameter("wind_speed", _rng.randf_range(0.4, 0.75))
-		mat.set_shader_parameter("wind_strength", _rng.randf_range(0.018, 0.034))
+		if is_rock:
+			mat.set_shader_parameter("wind_speed", _rng.randf_range(0.5, 0.9))
+			mat.set_shader_parameter("wind_strength", _rng.randf_range(0.035, 0.06))
+			mat.set_shader_parameter("height_power", 0.35)
+			mat.set_shader_parameter("gust_scale", _rng.randf_range(1.8, 3.2))
+		else:
+			mat.set_shader_parameter("wind_speed", _rng.randf_range(0.65, 1.15))
+			mat.set_shader_parameter("wind_strength", _rng.randf_range(0.06, 0.11))
+			mat.set_shader_parameter("height_power", 1.15)
+			mat.set_shader_parameter("gust_scale", _rng.randf_range(2.0, 3.6))
 		spr.material = mat
 	return spr
 

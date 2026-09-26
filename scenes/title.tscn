@@ -1,0 +1,62 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/title.gd" id="1_title"]
+[ext_resource type="Texture2D" path="res://assets/pip_title.png" id="2_pip"]
+[ext_resource type="Texture2D" path="res://assets/pipsacorns_title.png" id="3_logo"]
+[ext_resource type="Texture2D" path="res://assets/start_text.png" id="4_start"]
+
+[node name="Title" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_title")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.98, 0.93, 0.86, 1)
+
+[node name="PipTitle" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 576.0
+offset_bottom = 640.0
+mouse_filter = 2
+texture = ExtResource("2_pip")
+expand_mode = 1
+stretch_mode = 1
+texture_filter = 1
+
+[node name="RightColumn" type="VBoxContainer" parent="."]
+layout_mode = 0
+offset_left = 420.0
+offset_right = 920.0
+offset_bottom = 640.0
+theme_override_constants/separation = 28
+alignment = 1
+
+[node name="Logo" type="TextureRect" parent="RightColumn"]
+custom_minimum_size = Vector2(0, 160)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+texture = ExtResource("3_logo")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 1
+
+[node name="StartButton" type="TextureButton" parent="RightColumn"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("4_start")
+ignore_texture_size = true
+stretch_mode = 5
+texture_filter = 1

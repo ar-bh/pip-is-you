@@ -1,0 +1,79 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/comic.gd" id="1_comic"]
+[ext_resource type="Texture2D" path="res://assets/parallax_background.png" id="2_parallax"]
+[ext_resource type="Texture2D" path="res://assets/next_text.png" id="3_next"]
+
+[node name="Comic" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_comic")
+
+[node name="Backdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.55, 0.5, 1)
+
+[node name="Parallax" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+clip_contents = true
+
+[node name="LayerA" type="TextureRect" parent="Parallax"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("2_parallax")
+expand_mode = 1
+stretch_mode = 1
+texture_filter = 1
+
+[node name="LayerB" type="TextureRect" parent="Parallax"]
+layout_mode = 0
+mouse_filter = 2
+texture = ExtResource("2_parallax")
+expand_mode = 1
+stretch_mode = 1
+texture_filter = 1
+
+[node name="Panels" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="NextPlate" type="ColorRect" parent="."]
+layout_mode = 0
+offset_left = 360.0
+offset_top = 546.0
+offset_right = 600.0
+offset_bottom = 630.0
+mouse_filter = 2
+color = Color(0.98, 0.93, 0.86, 0.92)
+
+[node name="NextButton" type="TextureButton" parent="."]
+layout_mode = 0
+offset_left = 370.0
+offset_top = 552.0
+offset_right = 590.0
+offset_bottom = 624.0
+texture_normal = ExtResource("3_next")
+ignore_texture_size = true
+stretch_mode = 5
+texture_filter = 1

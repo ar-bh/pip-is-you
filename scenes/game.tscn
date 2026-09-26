@@ -8,7 +8,7 @@
 [ext_resource type="Shader" path="res://shaders/grass_wind.gdshader" id="6_wind"]
 [ext_resource type="Script" path="res://scripts/falling_leaves.gd" id="7_leaves"]
 [ext_resource type="Script" path="res://scripts/autumn_scenery.gd" id="8_scenery"]
-[ext_resource type="AudioStream" uid="uid://w7beckuoybps" path="res://assets/spring-wild-horseradish-jam.mp3" id="9_music"]
+[ext_resource type="AudioStream" uid="uid://btadasoundfx01" path="res://assets/tada.mp3" id="10_tada"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")
@@ -41,9 +41,9 @@ content_margin_bottom = 22.0
 script = ExtResource("1_game")
 levels = Array[PackedScene]([ExtResource("2_level1"), ExtResource("3_level2")])
 
-[node name="Music" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("9_music")
-volume_db = -6.0
+[node name="Tada" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("10_tada")
+volume_db = -2.0
 
 [node name="Ambience" type="CanvasLayer" parent="."]
 layer = -10
@@ -64,7 +64,6 @@ z_index = -2
 script = ExtResource("8_scenery")
 
 [node name="LevelHost" type="Node2D" parent="."]
-visible = false
 z_index = 1
 
 [node name="FallingLeaves" type="CanvasLayer" parent="."]
@@ -75,38 +74,6 @@ script = ExtResource("7_leaves")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 10
-
-[node name="Menu" type="CenterContainer" parent="UI"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="VBox" type="VBoxContainer" parent="UI/Menu"]
-layout_mode = 2
-theme_override_constants/separation = 14
-
-[node name="Title" type="Label" parent="UI/Menu/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.94, 0.86, 1)
-theme_override_colors/font_shadow_color = Color(0.12, 0.05, 0.02, 0.75)
-theme_override_constants/shadow_offset_x = 2
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 40
-horizontal_alignment = 1
-text = "Pip's Autumn Quest"
-
-[node name="Prompt" type="Label" parent="UI/Menu/VBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.72, 0.92)
-theme_override_colors/font_shadow_color = Color(0.12, 0.05, 0.02, 0.65)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 16
-horizontal_alignment = 1
-text = "Enter to begin"
 
 [node name="WinPanel" type="CenterContainer" parent="UI"]
 visible = false

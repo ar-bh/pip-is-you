@@ -6,15 +6,13 @@ extends Node2D
 
 @onready var level_host: Node2D = $LevelHost
 @onready var scenery: AutumnScenery = $AutumnScenery
-@onready var menu: Control = $UI/Menu
 @onready var win_panel: Control = $UI/WinPanel
 @onready var win_title: Label = $UI/WinPanel/Panel/VBox/WinTitle
 @onready var win_hint: Label = $UI/WinPanel/Panel/VBox/WinHint
-@onready var music: AudioStreamPlayer = $Music
+@onready var tada: AudioStreamPlayer = $Tada
 
 var _index := 0
 var _level: Level
-var _started := false
 
 func _ready() -> void:
 	if levels.is_empty():
@@ -22,21 +20,17 @@ func _ready() -> void:
 			load("res://levels/level_01.tscn"),
 			load("res://levels/level_02.tscn"),
 		]
-	if music.stream is AudioStreamMP3:
-		(music.stream as AudioStreamMP3).loop = true
+	App.ensure_music()
 	win_panel.visible = false
-	menu.visible = true
-	level_host.visible = false
+	level_host.visible = true
 	get_viewport().size_changed.connect(_center_level)
-	_show_menu_scenery()
+	_load_current()
+
+func _process(delta: float) -> void:
+	if _level:
+		_level.tick(delta)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if not _started:
-		if event.is_action_pressed("ui_accept") or event.is_action_pressed("ui_select"):
-			_start_game()
-			get_viewport().set_input_as_handled()
-		return
-
 	if event.is_action_pressed("restart"):
 		_load_current()
 		get_viewport().set_input_as_handled()
@@ -49,28 +43,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not _level.has_won():
 			win_panel.visible = false
 		get_viewport().set_input_as_handled()
-
-func _process(delta: float) -> void:
-	if _started and _level:
-		_level.tick(delta)
-
-func _start_game() -> void:
-	if _started:
-		return
-	_started = true
-	menu.visible = false
-	level_host.visible = true
-	if not music.playing:
-		music.play()
-	_index = 0
-	_load_current()
-
-func _show_menu_scenery() -> void:
-	var view := get_viewport().get_visible_rect().size
-	var board_size := Vector2(view.x * 0.42, view.y * 0.42)
-	var host := ((view - board_size) * 0.5).floor()
-	if scenery:
-		scenery.rebuild(host, board_size, view)
 
 func _load_current() -> void:
 	if _level:
@@ -91,9 +63,6 @@ func _load_current() -> void:
 	_center_level()
 
 func _center_level() -> void:
-	if not _started:
-		_show_menu_scenery()
-		return
 	if _level == null or not is_instance_valid(_level):
 		return
 	var board: Board = _level.get_node_or_null("Board") as Board
@@ -110,6 +79,7 @@ func _next_level() -> void:
 		win_title.text = "All the acorns are gathered"
 		win_hint.text = "R to wander this clearing again"
 		win_panel.visible = true
+		tada.play()
 		return
 	_index += 1
 	_load_current()
@@ -118,3 +88,4 @@ func _on_level_won() -> void:
 	win_title.text = "Pip found an acorn"
 	win_hint.text = "Enter — next clearing"
 	win_panel.visible = true
+	tada.play()
