@@ -1,8 +1,8 @@
 class_name MoveTrail
 extends Node2D
 
-const BOTTOM_TEX := preload("res://tiles/bottom_trail.png")
-const TOP_TEX := preload("res://tiles/trail_top.png")
+const BOTTOM_TEX := preload("res://assets/tiles/bottom_trail.png")
+const TOP_TEX := preload("res://assets/tiles/trail_top.png")
 
 @export var enabled: bool = false:
 	set(value):

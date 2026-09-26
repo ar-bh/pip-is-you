@@ -1,8 +1,8 @@
 [gd_scene format=4]
 
-[ext_resource type="Script" path="res://scripts/level.gd" id="1_8yqd8"]
-[ext_resource type="Script" path="res://scripts/board.gd" id="2_h518d"]
-[ext_resource type="TileSet" path="res://tiles/piece_tileset.tres" id="3_didps"]
+[ext_resource type="Script" uid="uid://3mxy0vj71cy" path="res://scripts/level.gd" id="1_8yqd8"]
+[ext_resource type="Script" uid="uid://dgflneful8an" path="res://scripts/board.gd" id="2_h518d"]
+[ext_resource type="TileSet" uid="uid://cd88u2k78ds6d" path="res://assets/tiles/piece_tileset.tres" id="3_didps"]
 
 [node name="Level02" type="Node2D" unique_id=2126305567]
 script = ExtResource("1_8yqd8")

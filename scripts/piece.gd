@@ -28,19 +28,19 @@ const WORD_COLORS := {
 }
 
 const SPRITES := {
-	"acorn|0": preload("res://tiles/acorn.png"),
-	"acorn|1": preload("res://tiles/acorn_text.png"),
-	"pip|1": preload("res://tiles/pip_text.png"),
-	"is|1": preload("res://tiles/is_text.png"),
-	"you|1": preload("res://tiles/you_text.png"),
-	"win|1": preload("res://tiles/win_text.png"),
+	"acorn|0": preload("res://assets/tiles/acorn.png"),
+	"acorn|1": preload("res://assets/tiles/acorn_text.png"),
+	"pip|1": preload("res://assets/tiles/pip_text.png"),
+	"is|1": preload("res://assets/tiles/is_text.png"),
+	"you|1": preload("res://assets/tiles/you_text.png"),
+	"win|1": preload("res://assets/tiles/win_text.png"),
 }
 
 const PIP_DIR := {
-	Vector2i.DOWN: preload("res://tiles/pip_down.png"),
-	Vector2i.UP: preload("res://tiles/pip_up.png"),
-	Vector2i.RIGHT: preload("res://tiles/pip_right.png"),
-	Vector2i.LEFT: preload("res://tiles/pip_right.png"),
+	Vector2i.DOWN: preload("res://assets/tiles/pip_down.png"),
+	Vector2i.UP: preload("res://assets/tiles/pip_up.png"),
+	Vector2i.RIGHT: preload("res://assets/tiles/pip_right.png"),
+	Vector2i.LEFT: preload("res://assets/tiles/pip_right.png"),
 }
 
 var _board: Board

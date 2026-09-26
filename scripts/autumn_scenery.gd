@@ -2,10 +2,10 @@ class_name AutumnScenery
 extends Node2D
 
 const TREES: Array[Texture2D] = [
-	preload("res://tiles/tree_1.png"),
-	preload("res://tiles/tree_2.png"),
+	preload("res://assets/tiles/tree_1.png"),
+	preload("res://assets/tiles/tree_2.png"),
 ]
-const ROCK := preload("res://tiles/rock_1.png")
+const ROCK := preload("res://assets/tiles/rock_1.png")
 const PROP_WIND := preload("res://shaders/prop_wind.gdshader")
 
 @export var seed_value: int = 11

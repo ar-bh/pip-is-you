@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://3mxy0vj71cy" path="res://scripts/level.gd" id="1_81a5f"]
 [ext_resource type="Script" uid="uid://dgflneful8an" path="res://scripts/board.gd" id="2_gg43x"]
-[ext_resource type="TileSet" uid="uid://cd88u2k78ds6d" path="res://tiles/piece_tileset.tres" id="3_mllcm"]
+[ext_resource type="TileSet" uid="uid://cd88u2k78ds6d" path="res://assets/tiles/piece_tileset.tres" id="3_mllcm"]
 
 [node name="Level01" type="Node2D" unique_id=2089078812]
 script = ExtResource("1_81a5f")
