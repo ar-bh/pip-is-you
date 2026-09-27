@@ -22,6 +22,9 @@ func piece_has(piece: Piece, property: StringName) -> bool:
 	# Bushes are pushable unless BUSH IS STOP (or YOU) is active.
 	if piece.id == &"bush" and property == &"push" and not has_property(&"bush", &"you") and not has_property(&"bush", &"stop"):
 		return true
+	# Walls are solid unless WALL IS PUSH (or YOU) is active.
+	if piece.id == &"wall" and property == &"stop" and not has_property(&"wall", &"you") and not has_property(&"wall", &"push"):
+		return true
 	return has_property(piece.id, property)
 
 func rebuild(pieces: Array) -> void:
@@ -72,7 +75,7 @@ func _noun_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 	if not by_cell.has(cell):
 		return null
 	for piece: Piece in by_cell[cell]:
-		if piece.id in [&"pip", &"acorn", &"bush", &"leaf"]:
+		if piece.id in [&"pip", &"acorn", &"bush", &"leaf", &"wall"]:
 			return piece
 	return null
 

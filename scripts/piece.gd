@@ -37,6 +37,8 @@ const SPRITES := {
 	"you|1": preload("res://assets/tiles/you_text.png"),
 	"win|1": preload("res://assets/tiles/win_text.png"),
 	"stop|1": preload("res://assets/tiles/stop_text.png"),
+	"wall|0": preload("res://assets/tiles/wall_text.png"),
+	"wall|1": preload("res://assets/tiles/wall_text.png"),
 }
 
 const PIP_DIR := {

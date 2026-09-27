@@ -100,8 +100,16 @@ func _build_from_tilemap() -> void:
 		piece.queue_free()
 	pieces.clear()
 
-	_origin = Vector2i.ZERO
 	tile_map.visible = false
+	var used := tile_map.get_used_rect()
+	if used.size == Vector2i.ZERO:
+		_origin = Vector2i.ZERO
+		board.columns = 1
+		board.rows = 1
+		return
+
+	_origin = used.position
+	board.sync_from_rect(Rect2i(Vector2i.ZERO, used.size))
 
 	for cell in tile_map.get_used_cells():
 		var source_id := tile_map.get_cell_source_id(cell)
@@ -117,9 +125,9 @@ func _build_from_tilemap() -> void:
 			continue
 		var piece_id: StringName = tile_data.get_custom_data("piece_id")
 		var is_text: bool = bool(tile_data.get_custom_data("is_text"))
-		if piece_id == &"" or piece_id == &"wall":
+		if piece_id == &"":
 			continue
-		_spawn(cell, is_text, piece_id)
+		_spawn(cell - _origin, is_text, piece_id)
 
 func _try_turn(direction: Vector2i) -> void:
 	if _busy or _won or direction == Vector2i.ZERO:
@@ -170,8 +178,7 @@ func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
 	var chain: Array[Piece] = []
 	var cell := start
 	while true:
-		if not board.contains(cell):
-			return null
+		# No hard board edge — paint WALL tiles to block movement.
 		var here := _pieces_at(cell)
 		if here.is_empty():
 			return chain
