@@ -138,35 +138,43 @@ func _try_turn(direction: Vector2i) -> void:
 	if yous.is_empty():
 		return
 
-	var plan: Array = []
+	# Front-most in the move direction first, so a blocked YOU still occupies its cell
+	# for the ones behind (no stacking into walls / each other).
 	yous.sort_custom(func(a: Piece, b: Piece) -> bool:
 		return a.cell.x * direction.x + a.cell.y * direction.y > b.cell.x * direction.x + b.cell.y * direction.y
 	)
+
+	var planned: Dictionary = {} # Piece -> Vector2i destination
 	for you in yous:
-		var chain = _push_chain(you.cell + direction, direction)
+		var dest := you.cell + direction
+		if _destination_taken(planned, dest):
+			continue
+		var chain = _push_chain(dest, direction, planned)
 		if chain == null:
 			continue
-		plan.append({"piece": you, "to": you.cell + direction})
+		var tentative: Dictionary = {you: dest}
+		var ok := true
 		for pushed: Piece in chain:
-			plan.append({"piece": pushed, "to": pushed.cell + direction})
+			var push_to: Vector2i = pushed.cell + direction
+			if _destination_taken(planned, push_to) or _destination_taken(tentative, push_to):
+				ok = false
+				break
+			tentative[pushed] = push_to
+		if not ok:
+			continue
+		for piece: Piece in tentative.keys():
+			planned[piece] = tentative[piece]
 
-	if plan.is_empty():
+	if planned.is_empty():
 		return
 
 	_busy = true
 	_history.append(_snapshot())
-	var moved: Dictionary = {}
 	var you_set: Dictionary = {}
 	for you in yous:
 		you_set[you] = true
-	for entry in plan:
-		var piece: Piece = entry.piece
-		if moved.has(piece):
-			continue
-		moved[piece] = true
-		piece.cell = entry.to
-
-	for piece: Piece in moved.keys():
+	for piece: Piece in planned.keys():
+		piece.cell = planned[piece]
 		if you_set.has(piece):
 			piece.set_facing(direction)
 		piece.animate_to_cell(STEP_DURATION)
@@ -176,12 +184,21 @@ func _try_turn(direction: Vector2i) -> void:
 	rules_changed.emit(rules.describe())
 	_check_win()
 
-func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
+func _destination_taken(planned: Dictionary, dest: Vector2i) -> bool:
+	for piece: Piece in planned.keys():
+		if planned[piece] == dest:
+			return true
+	return false
+
+func _push_chain(start: Vector2i, direction: Vector2i, planned: Dictionary = {}) -> Variant:
 	var chain: Array[Piece] = []
 	var cell := start
 	while true:
-		# No hard board edge — paint WALL tiles to block movement.
 		var here := _pieces_at(cell)
+		# Ignore pieces that are already leaving this cell this turn.
+		here = here.filter(func(piece: Piece) -> bool:
+			return not (planned.has(piece) and planned[piece] != piece.cell)
+		)
 		if here.is_empty():
 			return chain
 
@@ -189,7 +206,9 @@ func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
 		var softs: Array[Piece] = []
 		var solid_stop := false
 		for piece in here:
+			# Other YOU that aren't leaving act as solid (prevents stacking).
 			if rules.piece_has(piece, &"you"):
+				solid_stop = true
 				continue
 			if rules.piece_has(piece, &"push"):
 				pushables.append(piece)
@@ -211,6 +230,7 @@ func _push_chain(start: Vector2i, direction: Vector2i) -> Variant:
 			return chain
 
 		if chain.is_empty():
+			# Soft-only tile with no push: YOU can step onto/through it.
 			return chain
 
 		chain.append_array(softs)

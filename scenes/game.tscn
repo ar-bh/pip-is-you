@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://cmqymg2k1w441" path="res://assets/acorn_found.png" id="11_found"]
 [ext_resource type="Texture2D" uid="uid://dnwvqv2o3skpr" path="res://assets/next_text.png" id="12_next"]
 [ext_resource type="Texture2D" uid="uid://d3u5ggipvybpn" path="res://assets/hint_text.png" id="13_hint"]
-[ext_resource type="FontFile" path="res://assets/fonts/augiepixel.ttf" id="14_font"]
+[ext_resource type="FontFile" uid="uid://dw6jn85wuy0xw" path="res://assets/fonts/augiepixel.ttf" id="14_font"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")
@@ -25,6 +25,22 @@ shader_parameter/wind_speed = 0.4
 shader_parameter/wind_strength_px = 1.5
 shader_parameter/wind_scale = 14.0
 shader_parameter/texture_mix = 0.55
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint_btn"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.22, 0.16, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint"]
 content_margin_left = 14.0
@@ -58,25 +74,9 @@ corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint_btn"]
-content_margin_left = 8.0
-content_margin_top = 4.0
-content_margin_right = 8.0
-content_margin_bottom = 4.0
-bg_color = Color(1, 1, 1, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.35, 0.22, 0.16, 0.9)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
-
 [node name="Game" type="Node2D" unique_id=1750562841]
 script = ExtResource("1_game")
-levels = Array[PackedScene]([ExtResource("2_level1"), ExtResource("3_level2"), ExtResource("3_level3")])
+auto_discover_levels = true
 move_trail_enabled = true
 move_trail_fade_enabled = true
 
@@ -99,11 +99,9 @@ mouse_filter = 2
 color = Color(0.965, 0.627, 0.412, 1)
 
 [node name="AutumnScenery" type="Node2D" parent="." unique_id=417463093]
-z_index = 0
 script = ExtResource("8_scenery")
 
 [node name="LevelHost" type="Node2D" parent="." unique_id=651350499]
-z_index = 0
 
 [node name="FallingLeaves" type="CanvasLayer" parent="." unique_id=1585632758]
 layer = 5
@@ -148,8 +146,8 @@ theme_override_constants/margin_bottom = 2
 [node name="HintLabel" type="Label" parent="UI/HintPanel/Margin" unique_id=55416585]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
-theme_override_fonts/font = ExtResource("14_font")
 theme_override_colors/font_color = Color(0.28, 0.16, 0.1, 1)
+theme_override_fonts/font = ExtResource("14_font")
 theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
 
@@ -158,10 +156,10 @@ offset_left = 200.0
 offset_top = 560.0
 offset_right = 760.0
 offset_bottom = 620.0
-theme_override_fonts/font = ExtResource("14_font")
 theme_override_colors/font_color = Color(0.98, 0.94, 0.86, 1)
 theme_override_colors/font_outline_color = Color(0.22, 0.12, 0.08, 0.85)
 theme_override_constants/outline_size = 6
+theme_override_fonts/font = ExtResource("14_font")
 theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1

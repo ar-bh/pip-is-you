@@ -3,6 +3,10 @@ extends Node2D
 @export var levels: Array[PackedScene] = []
 @export var move_trail_enabled: bool = true
 @export var move_trail_fade_enabled: bool = true
+@export var levels_folder: String = "res://levels"
+## If true, auto-loads every level_*.tscn in levels_folder (sorted).
+## Manual Levels array is only used when this is off or the folder is empty.
+@export var auto_discover_levels: bool = true
 
 @onready var level_host: Node2D = $LevelHost
 @onready var scenery: AutumnScenery = $AutumnScenery
@@ -22,6 +26,10 @@ var _guide_base_y := 0.0
 var _guide_phase := 0.0
 
 func _ready() -> void:
+	if auto_discover_levels:
+		var found := _discover_levels()
+		if not found.is_empty():
+			levels = found
 	if levels.is_empty():
 		levels = [
 			load("res://levels/level_01.tscn"),
@@ -40,6 +48,26 @@ func _ready() -> void:
 	_fit_hint_ui()
 	_fit_guide_ui()
 	_load_current()
+
+func _discover_levels() -> Array[PackedScene]:
+	var found: Array[PackedScene] = []
+	var paths: PackedStringArray = []
+	var dir := DirAccess.open(levels_folder)
+	if dir == null:
+		return found
+	dir.list_dir_begin()
+	var file_name := dir.get_next()
+	while file_name != "":
+		if not dir.current_is_dir() and file_name.begins_with("level_") and file_name.ends_with(".tscn"):
+			paths.append(levels_folder.path_join(file_name))
+		file_name = dir.get_next()
+	dir.list_dir_end()
+	paths.sort()
+	for path in paths:
+		var packed: PackedScene = load(path)
+		if packed != null:
+			found.append(packed)
+	return found
 
 func _process(delta: float) -> void:
 	if _level:
@@ -146,7 +174,12 @@ func _center_level() -> void:
 	var view := get_viewport().get_visible_rect().size
 	level_host.position = ((view - board_size) * 0.5).floor()
 	if scenery:
-		scenery.rebuild(level_host.position, board_size, view)
+		var blocked: Array[Vector2] = []
+		# Keep whole tree canopies clear of puzzle tiles (words, walls, etc.).
+		var cell_r := float(board.cell_size) * 0.75
+		for piece in _level.pieces:
+			blocked.append(level_host.position + piece.position)
+		scenery.rebuild(level_host.position, board_size, view, _index, blocked, cell_r)
 	for piece in _level.pieces:
 		piece.refresh_depth()
 

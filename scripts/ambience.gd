@@ -7,8 +7,9 @@ func _ready() -> void:
 	var peach := Color(0.965, 0.627, 0.412, 1.0)
 	RenderingServer.set_default_clear_color(peach)
 	_fit()
-	get_viewport().size_changed.connect(_fit)
-	get_tree().root.size_changed.connect(_fit)
+	var vp := get_viewport()
+	if not vp.size_changed.is_connected(_fit):
+		vp.size_changed.connect(_fit)
 
 func _fit() -> void:
 	ground.set_anchors_preset(Control.PRESET_FULL_RECT)
