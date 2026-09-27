@@ -1,8 +1,8 @@
 extends Node2D
 
 @export var levels: Array[PackedScene] = []
-@export var move_trail_enabled: bool = false
-@export var move_trail_fade_enabled: bool = false
+@export var move_trail_enabled: bool = true
+@export var move_trail_fade_enabled: bool = true
 
 @onready var level_host: Node2D = $LevelHost
 @onready var scenery: AutumnScenery = $AutumnScenery
@@ -12,10 +12,13 @@ extends Node2D
 @onready var hint_btn: TextureButton = $UI/HintButton
 @onready var hint_panel: PanelContainer = $UI/HintPanel
 @onready var hint_label: Label = $UI/HintPanel/Margin/HintLabel
+@onready var guide_label: Label = $UI/GuideLabel
 @onready var tada: AudioStreamPlayer = $Tada
 
 var _index := 0
 var _level: Level
+var _guide_base_y := 0.0
+var _guide_phase := 0.0
 
 func _ready() -> void:
 	if levels.is_empty():
@@ -31,12 +34,15 @@ func _ready() -> void:
 	level_host.visible = true
 	get_viewport().size_changed.connect(_center_level)
 	get_viewport().size_changed.connect(_fit_hint_ui)
+	get_viewport().size_changed.connect(_fit_guide_ui)
 	_fit_hint_ui()
+	_fit_guide_ui()
 	_load_current()
 
 func _process(delta: float) -> void:
 	if _level:
 		_level.tick(delta)
+	_bob_guide(delta)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):
@@ -57,6 +63,7 @@ func _load_current() -> void:
 		win_art.visible = false
 		next_btn.visible = false
 		hint_btn.visible = false
+		guide_label.visible = false
 		win_panel.visible = true
 		return
 	_level = levels[_index].instantiate()
@@ -66,6 +73,7 @@ func _load_current() -> void:
 	_level.won.connect(_on_level_won)
 	win_panel.visible = false
 	_refresh_hint_ui()
+	_refresh_guide_ui()
 	await get_tree().process_frame
 	_center_level()
 
@@ -77,6 +85,14 @@ func _refresh_hint_ui() -> void:
 	hint_label.text = text
 	hint_panel.visible = false
 	_fit_hint_ui()
+
+func _refresh_guide_ui() -> void:
+	var text := ""
+	if _level:
+		text = _level.guide_text.strip_edges()
+	guide_label.text = text
+	guide_label.visible = not text.is_empty()
+	_fit_guide_ui()
 
 func _toggle_hint() -> void:
 	if hint_label.text.is_empty():
@@ -93,6 +109,23 @@ func _fit_hint_ui() -> void:
 	panel_size.x = clampf(panel_size.x, 180.0, minf(360.0, view.x - margin * 2.0))
 	hint_panel.size = panel_size
 	hint_panel.position = Vector2(margin, margin + hint_btn.size.y + 8.0)
+
+func _fit_guide_ui() -> void:
+	if guide_label == null:
+		return
+	var view := get_viewport().get_visible_rect().size
+	guide_label.reset_size()
+	var size := guide_label.get_combined_minimum_size()
+	size.x = minf(maxf(size.x, 280.0), view.x - 48.0)
+	guide_label.size = size
+	_guide_base_y = view.y - size.y - 28.0
+	guide_label.position = Vector2((view.x - size.x) * 0.5, _guide_base_y)
+
+func _bob_guide(delta: float) -> void:
+	if guide_label == null or not guide_label.visible:
+		return
+	_guide_phase += delta * 2.2
+	guide_label.position.y = _guide_base_y + sin(_guide_phase) * 4.0
 
 func _center_level() -> void:
 	if _level == null or not is_instance_valid(_level):
@@ -118,6 +151,7 @@ func _next_level() -> void:
 func _on_level_won() -> void:
 	hint_panel.visible = false
 	hint_btn.visible = false
+	guide_label.visible = false
 	win_art.visible = true
 	next_btn.visible = _index + 1 < levels.size()
 	win_panel.visible = true

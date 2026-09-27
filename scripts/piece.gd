@@ -32,6 +32,8 @@ const SPRITES := {
 	"acorn|1": preload("res://assets/tiles/acorn_text.png"),
 	"bush|0": preload("res://assets/tiles/bush.png"),
 	"bush|1": preload("res://assets/tiles/bush_text.png"),
+	"leaf|0": preload("res://assets/tiles/leaf.png"),
+	"leaf|1": preload("res://assets/tiles/leaf_text.png"),
 	"pip|1": preload("res://assets/tiles/pip_text.png"),
 	"is|1": preload("res://assets/tiles/is_text.png"),
 	"you|1": preload("res://assets/tiles/you_text.png"),

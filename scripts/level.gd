@@ -12,9 +12,11 @@ const HOLD_REPEAT_DELAY := 0.28
 @onready var tile_map: TileMapLayer = $TileMap
 @onready var pieces_root: Node2D = $Pieces
 
-@export var move_trail_enabled: bool = false
-@export var move_trail_fade_enabled: bool = false
+@export var move_trail_enabled: bool = true
+@export var move_trail_fade_enabled: bool = true
 @export_multiline var hint_text: String = ""
+## Always-visible tip at the bottom of the screen.
+@export_multiline var guide_text: String = ""
 
 var rules := RuleBook.new()
 var pieces: Array[Piece] = []

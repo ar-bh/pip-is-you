@@ -59,6 +59,8 @@ content_margin_bottom = 12.0
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
 levels = Array[PackedScene]([ExtResource("2_level1"), ExtResource("3_level2")])
+move_trail_enabled = true
+move_trail_fade_enabled = true
 
 [node name="Tada" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("10_tada")
@@ -124,6 +126,22 @@ custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.1, 1)
 theme_override_font_sizes/font_size = 16
+autowrap_mode = 3
+text = ""
+
+[node name="GuideLabel" type="Label" parent="UI"]
+anchors_preset = 0
+offset_left = 200.0
+offset_top = 560.0
+offset_right = 760.0
+offset_bottom = 620.0
+mouse_filter = 2
+theme_override_colors/font_color = Color(0.98, 0.94, 0.86, 1)
+theme_override_colors/font_outline_color = Color(0.22, 0.12, 0.08, 0.85)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 20
+horizontal_alignment = 1
+vertical_alignment = 1
 autowrap_mode = 3
 text = ""
 
