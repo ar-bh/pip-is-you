@@ -303,6 +303,9 @@ func _undo() -> void:
 	_refresh_rules()
 	rules_changed.emit(rules.describe())
 
+func undo() -> void:
+	_undo()
+
 func _spawn(cell: Vector2i, is_text: bool, id: StringName) -> Piece:
 	var piece: Piece = PieceScene.instantiate()
 	pieces_root.add_child(piece)

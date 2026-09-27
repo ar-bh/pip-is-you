@@ -329,6 +329,16 @@ func go_back_level() -> void:
 func skip_level() -> void:
 	_next_level()
 
+func restart_level() -> void:
+	_load_current()
+
+func undo_move() -> void:
+	if _level == null or not is_instance_valid(_level):
+		return
+	_level.undo()
+	if not _level.has_won():
+		win_panel.visible = false
+
 func _on_level_won() -> void:
 	hint_panel.visible = false
 	hint_btn_plate.visible = false

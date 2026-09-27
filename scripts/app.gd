@@ -21,6 +21,8 @@ var _panel: PanelContainer
 var _slider: HSlider
 var _back_level_btn: Button
 var _skip_level_btn: Button
+var _undo_btn: Button
+var _restart_btn: Button
 var _menu_btn: Button
 var _volume := 0.75
 var _panel_open := false
@@ -139,6 +141,14 @@ func _build_settings_ui() -> void:
 	_slider.value_changed.connect(set_volume)
 	vbox.add_child(_slider)
 
+	_undo_btn = _make_settings_button("Undo")
+	_undo_btn.pressed.connect(_undo_move)
+	vbox.add_child(_undo_btn)
+
+	_restart_btn = _make_settings_button("Restart level")
+	_restart_btn.pressed.connect(_restart_level)
+	vbox.add_child(_restart_btn)
+
 	_back_level_btn = _make_settings_button("Previous level")
 	_back_level_btn.pressed.connect(_back_level)
 	vbox.add_child(_back_level_btn)
@@ -199,6 +209,10 @@ func _update_settings_buttons() -> void:
 	var on_title := scene != null and String(scene.scene_file_path).ends_with("title.tscn")
 	var on_game := scene != null and scene.has_method("get_level_index")
 	_menu_btn.visible = not on_title
+	if _undo_btn:
+		_undo_btn.visible = on_game and scene.has_method("undo_move")
+	if _restart_btn:
+		_restart_btn.visible = on_game and scene.has_method("restart_level")
 	if _back_level_btn:
 		_back_level_btn.visible = on_game and int(scene.call("get_level_index")) > 0
 	if _skip_level_btn:
@@ -214,6 +228,20 @@ func _toggle_panel() -> void:
 	_panel.visible = _panel_open
 	if _panel_open:
 		_fit_settings_ui()
+
+func _undo_move() -> void:
+	var scene := get_tree().current_scene
+	if scene == null or not scene.has_method("undo_move"):
+		return
+	scene.call("undo_move")
+
+func _restart_level() -> void:
+	var scene := get_tree().current_scene
+	if scene == null or not scene.has_method("restart_level"):
+		return
+	_panel_open = false
+	_panel.visible = false
+	scene.call("restart_level")
 
 func _back_level() -> void:
 	var scene := get_tree().current_scene
