@@ -1,8 +1,9 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://y5l45daefglu"]
 
 [ext_resource type="Script" uid="uid://otpgdfet2ml2" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" uid="uid://cstmwh4irejld" path="res://levels/level_01.tscn" id="2_level1"]
 [ext_resource type="PackedScene" uid="uid://c27gtk5svlifa" path="res://levels/level_02.tscn" id="3_level2"]
+[ext_resource type="PackedScene" uid="uid://di6k8b1xnva6e" path="res://levels/level_03.tscn" id="3_level3"]
 [ext_resource type="Script" uid="uid://cupgvocsstqbc" path="res://scripts/ambience.gd" id="4_ambience"]
 [ext_resource type="Texture2D" uid="uid://beyh60jqhpfdb" path="res://assets/tiles/grass.png" id="5_ground"]
 [ext_resource type="Shader" uid="uid://cnxoqsstvgnj0" path="res://shaders/grass_wind.gdshader" id="6_wind"]
@@ -12,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://cmqymg2k1w441" path="res://assets/acorn_found.png" id="11_found"]
 [ext_resource type="Texture2D" uid="uid://dnwvqv2o3skpr" path="res://assets/next_text.png" id="12_next"]
 [ext_resource type="Texture2D" uid="uid://d3u5ggipvybpn" path="res://assets/hint_text.png" id="13_hint"]
+[ext_resource type="FontFile" path="res://assets/fonts/augiepixel.ttf" id="14_font"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")
@@ -24,23 +26,11 @@ shader_parameter/wind_strength_px = 1.5
 shader_parameter/wind_scale = 14.0
 shader_parameter/texture_mix = 0.55
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_win"]
-bg_color = Color(0.98, 0.93, 0.86, 0.96)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.35, 0.22, 0.16, 0.9)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
-content_margin_left = 28.0
-content_margin_top = 22.0
-content_margin_right = 28.0
-content_margin_bottom = 22.0
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
 bg_color = Color(0.98, 0.93, 0.86, 0.96)
 border_width_left = 2
 border_width_top = 2
@@ -51,26 +41,54 @@ corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-content_margin_left = 14.0
-content_margin_top = 10.0
-content_margin_right = 14.0
-content_margin_bottom = 12.0
 
-[node name="Game" type="Node2D"]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_win"]
+content_margin_left = 28.0
+content_margin_top = 22.0
+content_margin_right = 28.0
+content_margin_bottom = 22.0
+bg_color = Color(0.98, 0.93, 0.86, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.22, 0.16, 0.9)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint_btn"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.22, 0.16, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[node name="Game" type="Node2D" unique_id=1750562841]
 script = ExtResource("1_game")
-levels = Array[PackedScene]([ExtResource("2_level1"), ExtResource("3_level2")])
+levels = Array[PackedScene]([ExtResource("2_level1"), ExtResource("3_level2"), ExtResource("3_level3")])
 move_trail_enabled = true
 move_trail_fade_enabled = true
 
-[node name="Tada" type="AudioStreamPlayer" parent="."]
+[node name="Tada" type="AudioStreamPlayer" parent="." unique_id=1727661485]
 stream = ExtResource("10_tada")
 volume_db = -2.0
 
-[node name="Ambience" type="CanvasLayer" parent="."]
+[node name="Ambience" type="CanvasLayer" parent="." unique_id=367364880]
 layer = -10
 script = ExtResource("4_ambience")
 
-[node name="Ground" type="ColorRect" parent="Ambience"]
+[node name="Ground" type="ColorRect" parent="Ambience" unique_id=244655272]
 material = SubResource("ShaderMaterial_grass")
 anchors_preset = 15
 anchor_right = 1.0
@@ -80,32 +98,38 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.965, 0.627, 0.412, 1)
 
-[node name="AutumnScenery" type="Node2D" parent="."]
-z_index = -2
+[node name="AutumnScenery" type="Node2D" parent="." unique_id=417463093]
+z_index = 0
 script = ExtResource("8_scenery")
 
-[node name="LevelHost" type="Node2D" parent="."]
-z_index = 1
+[node name="LevelHost" type="Node2D" parent="." unique_id=651350499]
+z_index = 0
 
-[node name="FallingLeaves" type="CanvasLayer" parent="."]
+[node name="FallingLeaves" type="CanvasLayer" parent="." unique_id=1585632758]
 layer = 5
 
-[node name="Leaves" type="Node2D" parent="FallingLeaves"]
+[node name="Leaves" type="Node2D" parent="FallingLeaves" unique_id=1813288395]
 script = ExtResource("7_leaves")
 
-[node name="UI" type="CanvasLayer" parent="."]
+[node name="UI" type="CanvasLayer" parent="." unique_id=2113309513]
 layer = 10
 
-[node name="HintButton" type="TextureButton" parent="UI"]
+[node name="HintButtonPlate" type="PanelContainer" parent="UI" unique_id=499670571]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 152.0
+offset_bottom = 72.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_hint_btn")
+
+[node name="HintButton" type="TextureButton" parent="UI/HintButtonPlate" unique_id=499670572]
+texture_filter = 1
 custom_minimum_size = Vector2(120, 48)
-offset_right = 120.0
-offset_bottom = 48.0
+layout_mode = 2
 texture_normal = ExtResource("13_hint")
 ignore_texture_size = true
 stretch_mode = 5
-texture_filter = 1
 
-[node name="HintPanel" type="PanelContainer" parent="UI"]
+[node name="HintPanel" type="PanelContainer" parent="UI" unique_id=597997989]
 visible = false
 offset_left = 16.0
 offset_top = 72.0
@@ -114,38 +138,36 @@ offset_bottom = 140.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_hint")
 
-[node name="Margin" type="MarginContainer" parent="UI/HintPanel"]
+[node name="Margin" type="MarginContainer" parent="UI/HintPanel" unique_id=41639774]
 layout_mode = 2
 theme_override_constants/margin_left = 4
 theme_override_constants/margin_top = 2
 theme_override_constants/margin_right = 4
 theme_override_constants/margin_bottom = 2
 
-[node name="HintLabel" type="Label" parent="UI/HintPanel/Margin"]
+[node name="HintLabel" type="Label" parent="UI/HintPanel/Margin" unique_id=55416585]
 custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
+theme_override_fonts/font = ExtResource("14_font")
 theme_override_colors/font_color = Color(0.28, 0.16, 0.1, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
-text = ""
 
-[node name="GuideLabel" type="Label" parent="UI"]
-anchors_preset = 0
+[node name="GuideLabel" type="Label" parent="UI" unique_id=1753952770]
 offset_left = 200.0
 offset_top = 560.0
 offset_right = 760.0
 offset_bottom = 620.0
-mouse_filter = 2
+theme_override_fonts/font = ExtResource("14_font")
 theme_override_colors/font_color = Color(0.98, 0.94, 0.86, 1)
 theme_override_colors/font_outline_color = Color(0.22, 0.12, 0.08, 0.85)
 theme_override_constants/outline_size = 6
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 28
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
-text = ""
 
-[node name="WinPanel" type="CenterContainer" parent="UI"]
+[node name="WinPanel" type="CenterContainer" parent="UI" unique_id=571098012]
 visible = false
 anchors_preset = 15
 anchor_right = 1.0
@@ -154,30 +176,30 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Panel" type="PanelContainer" parent="UI/WinPanel"]
+[node name="Panel" type="PanelContainer" parent="UI/WinPanel" unique_id=895462683]
 custom_minimum_size = Vector2(320, 160)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_win")
 
-[node name="VBox" type="VBoxContainer" parent="UI/WinPanel/Panel"]
+[node name="VBox" type="VBoxContainer" parent="UI/WinPanel/Panel" unique_id=548657483]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="WinArt" type="TextureRect" parent="UI/WinPanel/Panel/VBox"]
+[node name="WinArt" type="TextureRect" parent="UI/WinPanel/Panel/VBox" unique_id=1804981426]
+texture_filter = 1
 custom_minimum_size = Vector2(280, 100)
 layout_mode = 2
 mouse_filter = 2
 texture = ExtResource("11_found")
 expand_mode = 1
 stretch_mode = 5
-texture_filter = 1
 
-[node name="NextButton" type="TextureButton" parent="UI/WinPanel/Panel/VBox"]
+[node name="NextButton" type="TextureButton" parent="UI/WinPanel/Panel/VBox" unique_id=612979946]
+texture_filter = 1
 custom_minimum_size = Vector2(160, 56)
 layout_mode = 2
 size_flags_horizontal = 4
 texture_normal = ExtResource("12_next")
 ignore_texture_size = true
 stretch_mode = 5
-texture_filter = 1

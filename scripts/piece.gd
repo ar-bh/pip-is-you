@@ -43,6 +43,8 @@ const SPRITES := {
 	"wall|1": preload("res://assets/tiles/wall_text.png"),
 }
 
+const UI_FONT := preload("res://assets/fonts/augiepixel.ttf")
+
 const PIP_DIR := {
 	Vector2i.DOWN: preload("res://assets/tiles/pip_down.png"),
 	Vector2i.UP: preload("res://assets/tiles/pip_up.png"),
@@ -66,6 +68,7 @@ func setup(board: Board, at: Vector2i, text: bool, piece_id: StringName) -> void
 
 func snap_to_cell() -> void:
 	position = _board.cell_center(cell)
+	refresh_depth()
 
 func set_facing(direction: Vector2i) -> void:
 	if direction == Vector2i.ZERO or not _has_directional_art():
@@ -85,6 +88,15 @@ func animate_to_cell(duration: float, reverse: bool = false) -> void:
 		snap_to_cell()
 		moved.emit()
 	)
+
+func refresh_depth() -> void:
+	# Lower on screen draws in front (same space as scenery trees).
+	z_as_relative = false
+	z_index = int(global_position.y)
+
+func _process(_delta: float) -> void:
+	if _move_tween != null and _move_tween.is_running():
+		refresh_depth()
 
 func display_name() -> String:
 	if id == &"wall":
@@ -152,7 +164,8 @@ func _build_visual() -> void:
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.position = body.position
 	label.size = body.size
-	label.add_theme_font_size_override("font_size", 13 if is_text else 15)
+	label.add_theme_font_override("font", UI_FONT)
+	label.add_theme_font_size_override("font_size", 18 if is_text else 20)
 	label.add_theme_color_override("font_color", Color(0.05, 0.05, 0.05))
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	label.text = display_name()

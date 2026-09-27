@@ -19,6 +19,10 @@ config/icon="res://icon.svg"
 
 App="*res://scripts/app.gd"
 
+[gui]
+
+theme/custom="res://assets/fonts/pip_theme.tres"
+
 [display]
 
 window/size/viewport_width=960

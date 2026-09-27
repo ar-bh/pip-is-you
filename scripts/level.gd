@@ -37,7 +37,7 @@ const DIRECTIONS := {
 }
 
 func _ready() -> void:
-	pieces_root.z_index = 2
+	pieces_root.y_sort_enabled = true
 	_move_trail = MoveTrail.new()
 	add_child(_move_trail)
 	move_child(_move_trail, 0)

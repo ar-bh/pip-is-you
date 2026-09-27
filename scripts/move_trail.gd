@@ -30,7 +30,8 @@ func setup(level: Level) -> void:
 	_last_drop.clear()
 	_stamps.clear()
 	_rng.randomize()
-	z_index = -1
+	z_as_relative = false
+	z_index = -1000
 	y_sort_enabled = false
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	set_process(enabled)

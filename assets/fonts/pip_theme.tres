@@ -1,0 +1,11 @@
+[gd_resource type="Theme" load_steps=2 format=3]
+
+[ext_resource type="FontFile" path="res://assets/fonts/augiepixel.ttf" id="1_augie"]
+
+[resource]
+default_font = ExtResource("1_augie")
+default_font_size = 24
+Button/font_sizes/font_size = 22
+Button/fonts/font = ExtResource("1_augie")
+Label/font_sizes/font_size = 24
+Label/fonts/font = ExtResource("1_augie")

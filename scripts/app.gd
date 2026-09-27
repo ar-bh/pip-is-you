@@ -4,6 +4,7 @@ const CURSOR := preload("res://assets/mouse.png")
 const MUSIC_STREAM := preload("res://assets/spring-wild-horseradish-jam.mp3")
 const SETTINGS_ICON := preload("res://assets/settings.png")
 const SOUND_TEXT := preload("res://assets/sound_text.png")
+const UI_FONT := preload("res://assets/fonts/augiepixel.ttf")
 const TITLE_SCENE := "res://scenes/title.tscn"
 const CURSOR_SCALE := 3
 const SETTINGS_BTN_SIZE := 48.0
@@ -18,6 +19,7 @@ var _ui_layer: CanvasLayer
 var _settings_btn: TextureButton
 var _panel: PanelContainer
 var _slider: HSlider
+var _back_level_btn: Button
 var _menu_btn: Button
 var _volume := 0.75
 var _panel_open := false
@@ -136,14 +138,24 @@ func _build_settings_ui() -> void:
 	_slider.value_changed.connect(set_volume)
 	vbox.add_child(_slider)
 
-	_menu_btn = Button.new()
-	_menu_btn.text = "Return to menu"
-	_menu_btn.focus_mode = Control.FOCUS_NONE
-	_menu_btn.custom_minimum_size = Vector2(180, 32)
-	_menu_btn.add_theme_font_size_override("font_size", 15)
-	_menu_btn.add_theme_color_override("font_color", Color(0.28, 0.16, 0.1, 1))
-	_menu_btn.add_theme_color_override("font_hover_color", Color(0.45, 0.22, 0.12, 1))
-	_menu_btn.add_theme_color_override("font_pressed_color", Color(0.18, 0.1, 0.06, 1))
+	_back_level_btn = _make_settings_button("Back level")
+	_back_level_btn.pressed.connect(_back_level)
+	vbox.add_child(_back_level_btn)
+
+	_menu_btn = _make_settings_button("Return to menu")
+	_menu_btn.pressed.connect(_return_to_menu)
+	vbox.add_child(_menu_btn)
+
+func _make_settings_button(label: String) -> Button:
+	var btn := Button.new()
+	btn.text = label
+	btn.focus_mode = Control.FOCUS_NONE
+	btn.custom_minimum_size = Vector2(180, 32)
+	btn.add_theme_font_override("font", UI_FONT)
+	btn.add_theme_font_size_override("font_size", 22)
+	btn.add_theme_color_override("font_color", Color(0.28, 0.16, 0.1, 1))
+	btn.add_theme_color_override("font_hover_color", Color(0.45, 0.22, 0.12, 1))
+	btn.add_theme_color_override("font_pressed_color", Color(0.18, 0.1, 0.06, 1))
 	var btn_style := StyleBoxFlat.new()
 	btn_style.bg_color = Color(0.92, 0.82, 0.7, 1)
 	btn_style.set_corner_radius_all(6)
@@ -151,13 +163,12 @@ func _build_settings_ui() -> void:
 	btn_style.content_margin_right = 10
 	btn_style.content_margin_top = 6
 	btn_style.content_margin_bottom = 6
-	_menu_btn.add_theme_stylebox_override("normal", btn_style)
+	btn.add_theme_stylebox_override("normal", btn_style)
 	var btn_hover := btn_style.duplicate()
 	btn_hover.bg_color = Color(0.95, 0.88, 0.78, 1)
-	_menu_btn.add_theme_stylebox_override("hover", btn_hover)
-	_menu_btn.add_theme_stylebox_override("pressed", btn_hover)
-	_menu_btn.pressed.connect(_return_to_menu)
-	vbox.add_child(_menu_btn)
+	btn.add_theme_stylebox_override("hover", btn_hover)
+	btn.add_theme_stylebox_override("pressed", btn_hover)
+	return btn
 
 func _fit_settings_ui() -> void:
 	if _settings_btn == null:
@@ -165,7 +176,7 @@ func _fit_settings_ui() -> void:
 	var view := get_viewport().get_visible_rect().size
 	var margin := 16.0
 	_settings_btn.position = Vector2(view.x - SETTINGS_BTN_SIZE - margin, margin)
-	_update_menu_button()
+	_update_settings_buttons()
 	_panel.reset_size()
 	var panel_size := _panel.get_combined_minimum_size()
 	if panel_size.x < 200.0:
@@ -176,18 +187,29 @@ func _fit_settings_ui() -> void:
 		margin + SETTINGS_BTN_SIZE + 8.0,
 	)
 
-func _update_menu_button() -> void:
+func _update_settings_buttons() -> void:
 	if _menu_btn == null:
 		return
 	var scene := get_tree().current_scene
 	var on_title := scene != null and String(scene.scene_file_path).ends_with("title.tscn")
+	var on_game := scene != null and scene.has_method("get_level_index")
 	_menu_btn.visible = not on_title
+	if _back_level_btn:
+		_back_level_btn.visible = on_game and int(scene.call("get_level_index")) > 0
 
 func _toggle_panel() -> void:
 	_panel_open = not _panel_open
 	_panel.visible = _panel_open
 	if _panel_open:
 		_fit_settings_ui()
+
+func _back_level() -> void:
+	var scene := get_tree().current_scene
+	if scene == null or not scene.has_method("go_back_level"):
+		return
+	_panel_open = false
+	_panel.visible = false
+	scene.call("go_back_level")
 
 func _return_to_menu() -> void:
 	_panel_open = false

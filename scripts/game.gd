@@ -9,7 +9,8 @@ extends Node2D
 @onready var win_panel: Control = $UI/WinPanel
 @onready var win_art: TextureRect = $UI/WinPanel/Panel/VBox/WinArt
 @onready var next_btn: TextureButton = $UI/WinPanel/Panel/VBox/NextButton
-@onready var hint_btn: TextureButton = $UI/HintButton
+@onready var hint_btn_plate: PanelContainer = $UI/HintButtonPlate
+@onready var hint_btn: TextureButton = $UI/HintButtonPlate/HintButton
 @onready var hint_panel: PanelContainer = $UI/HintPanel
 @onready var hint_label: Label = $UI/HintPanel/Margin/HintLabel
 @onready var guide_label: Label = $UI/GuideLabel
@@ -25,6 +26,7 @@ func _ready() -> void:
 		levels = [
 			load("res://levels/level_01.tscn"),
 			load("res://levels/level_02.tscn"),
+			load("res://levels/level_03.tscn"),
 		]
 	App.ensure_music()
 	next_btn.pressed.connect(_next_level)
@@ -42,6 +44,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if _level:
 		_level.tick(delta)
+		if scenery:
+			scenery.update_tree_fade(_level.get_you_pieces(), level_host.position, delta)
 	_bob_guide(delta)
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -62,6 +66,7 @@ func _load_current() -> void:
 	if _index < 0 or _index >= levels.size() or levels[_index] == null:
 		win_art.visible = false
 		next_btn.visible = false
+		hint_btn_plate.visible = false
 		hint_btn.visible = false
 		guide_label.visible = false
 		win_panel.visible = true
@@ -81,6 +86,7 @@ func _refresh_hint_ui() -> void:
 	var text := ""
 	if _level:
 		text = _level.hint_text.strip_edges()
+	hint_btn_plate.visible = not text.is_empty()
 	hint_btn.visible = not text.is_empty()
 	hint_label.text = text
 	hint_panel.visible = false
@@ -103,12 +109,15 @@ func _toggle_hint() -> void:
 func _fit_hint_ui() -> void:
 	var view := get_viewport().get_visible_rect().size
 	var margin := 16.0
-	hint_btn.position = Vector2(margin, margin)
+	hint_btn_plate.reset_size()
+	var plate_size := hint_btn_plate.get_combined_minimum_size()
+	hint_btn_plate.size = plate_size
+	hint_btn_plate.position = Vector2(margin, margin)
 	hint_panel.reset_size()
 	var panel_size := hint_panel.get_combined_minimum_size()
 	panel_size.x = clampf(panel_size.x, 180.0, minf(360.0, view.x - margin * 2.0))
 	hint_panel.size = panel_size
-	hint_panel.position = Vector2(margin, margin + hint_btn.size.y + 8.0)
+	hint_panel.position = Vector2(margin, margin + plate_size.y + 8.0)
 
 func _fit_guide_ui() -> void:
 	if guide_label == null:
@@ -138,6 +147,8 @@ func _center_level() -> void:
 	level_host.position = ((view - board_size) * 0.5).floor()
 	if scenery:
 		scenery.rebuild(level_host.position, board_size, view)
+	for piece in _level.pieces:
+		piece.refresh_depth()
 
 func _next_level() -> void:
 	if _index + 1 >= levels.size():
@@ -148,8 +159,19 @@ func _next_level() -> void:
 	_index += 1
 	_load_current()
 
+func get_level_index() -> int:
+	return _index
+
+func go_back_level() -> void:
+	if _index <= 0:
+		return
+	_index -= 1
+	win_panel.visible = false
+	_load_current()
+
 func _on_level_won() -> void:
 	hint_panel.visible = false
+	hint_btn_plate.visible = false
 	hint_btn.visible = false
 	guide_label.visible = false
 	win_art.visible = true

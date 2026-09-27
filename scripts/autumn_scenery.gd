@@ -10,9 +10,9 @@ const ROCK := preload("res://assets/tiles/rock_1.png")
 const PROP_WIND := preload("res://shaders/prop_wind.gdshader")
 
 @export var seed_value: int = 11
-@export var tree_count: int = 4
-@export var tree_scale_min: float = 1.2
-@export var tree_scale_max: float = 1.85
+@export var tree_count: int = 12
+@export var tree_scale_min: float = 1.05
+@export var tree_scale_max: float = 1.7
 @export var rock_count: int = 3
 @export var rock_scale_min: float = 0.7
 @export var rock_scale_max: float = 1.35
@@ -20,23 +20,28 @@ const PROP_WIND := preload("res://shaders/prop_wind.gdshader")
 @export var map_rock_scale_min: float = 0.55
 @export var map_rock_scale_max: float = 1.1
 @export var tree_brighten: Color = Color(1.08, 1.04, 0.98, 1.0)
+@export var tree_fade_alpha: float = 0.08
+@export var tree_fade_speed: float = 5.0
+@export var tree_touch_padding: float = 28.0
 
 var _board_rect := Rect2()
 var _view_size := Vector2(960, 640)
 var _rng := RandomNumberGenerator.new()
 var _props: Node2D
 var _map_rocks: Node2D
+var _trees: Array[Sprite2D] = []
+var _tree_base_alpha: Array[float] = []
 
 func _ready() -> void:
 	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	z_index = -2
+	z_index = 0
 	_map_rocks = Node2D.new()
 	_map_rocks.name = "MapRocks"
-	_map_rocks.z_index = 0
+	_map_rocks.y_sort_enabled = true
 	add_child(_map_rocks)
 	_props = Node2D.new()
 	_props.name = "Props"
-	_props.z_index = 1
+	_props.y_sort_enabled = true
 	add_child(_props)
 
 func rebuild(host_offset: Vector2, board_size: Vector2, view_size: Vector2) -> void:
@@ -44,6 +49,31 @@ func rebuild(host_offset: Vector2, board_size: Vector2, view_size: Vector2) -> v
 	_view_size = view_size
 	_rebuild_map_rocks()
 	_rebuild_props()
+
+func update_tree_fade(you_pieces: Array, host_offset: Vector2, delta: float) -> void:
+	if _trees.is_empty():
+		return
+	var you_points: Array[Vector2] = []
+	for piece in you_pieces:
+		if piece == null or not is_instance_valid(piece):
+			continue
+		you_points.append(host_offset + piece.position)
+
+	for i in _trees.size():
+		var tree := _trees[i]
+		if tree == null or not is_instance_valid(tree):
+			continue
+		var base_a := _tree_base_alpha[i] if i < _tree_base_alpha.size() else 1.0
+		var radius := float(tree.texture.get_width()) * absf(tree.scale.x) * 0.42 + tree_touch_padding
+		var touching := false
+		for point in you_points:
+			if point.distance_to(tree.position) <= radius:
+				touching = true
+				break
+		var target := tree_fade_alpha if touching else base_a
+		var c := tree.modulate
+		c.a = move_toward(c.a, target, tree_fade_speed * delta)
+		tree.modulate = c
 
 func _rebuild_map_rocks() -> void:
 	for child in _map_rocks.get_children():
@@ -68,15 +98,17 @@ func _rebuild_map_rocks() -> void:
 func _rebuild_props() -> void:
 	for child in _props.get_children():
 		child.queue_free()
+	_trees.clear()
+	_tree_base_alpha.clear()
 
-	var zones := _outside_zones()
-	if zones.is_empty():
-		return
+	# Full screen — including inside the puzzle board.
+	var zones: Array[Rect2] = [Rect2(Vector2.ZERO, _view_size).grow(40.0)]
+	zones.append_array(_outside_zones())
 
 	_rng.seed = seed_value + 42
-	_place_trees(zones, tree_count, tree_scale_min, tree_scale_max, 170.0)
+	_place_trees(zones, tree_count, tree_scale_min, tree_scale_max, 130.0)
 	_rng.seed = seed_value + 99
-	_place_rocks(_props, zones, rock_count, rock_scale_min, rock_scale_max, 80.0, true)
+	_place_rocks(_props, _outside_zones(), rock_count, rock_scale_min, rock_scale_max, 80.0, true)
 
 func _place_trees(
 	zones: Array[Rect2],
@@ -85,24 +117,32 @@ func _place_trees(
 	scale_max: float,
 	min_sep: float,
 ) -> void:
+	if zones.is_empty():
+		return
 	var placed := 0
 	var attempts := 0
-	while placed < count and attempts < count * 40:
+	while placed < count and attempts < count * 50:
 		attempts += 1
 		var tex: Texture2D = TREES[_rng.randi_range(0, TREES.size() - 1)]
 		var zone: Rect2 = zones[_rng.randi_range(0, zones.size() - 1)]
-		var s := _rng.randf_range(scale_min, scale_max)
-		var radius := float(tex.get_width()) * s * 0.45
 		var pos := Vector2(
 			_rng.randf_range(zone.position.x, zone.end.x),
 			_rng.randf_range(zone.position.y, zone.end.y),
 		)
-		if _board_rect.grow(-8.0).has_point(pos):
-			continue
+		# Slightly smaller / softer trees over the puzzle so they obscure less.
+		var s := _rng.randf_range(scale_min, scale_max)
+		if _board_rect.has_point(pos):
+			s *= 0.85
+		var radius := float(tex.get_width()) * s * 0.45
 		if _too_close(_props, pos, radius, min_sep):
 			continue
-		var spr := _make_sprite(tex, pos, s, tree_brighten, true)
+		var base_a := 0.72 if _board_rect.has_point(pos) else 1.0
+		var color := tree_brighten
+		color.a = base_a
+		var spr := _make_sprite(tex, pos, s, color, true)
 		_props.add_child(spr)
+		_trees.append(spr)
+		_tree_base_alpha.append(base_a)
 		placed += 1
 
 func _place_rocks(
@@ -114,6 +154,8 @@ func _place_rocks(
 	min_sep: float,
 	avoid_board_interior: bool,
 ) -> void:
+	if zones.is_empty():
+		return
 	var placed := 0
 	var attempts := 0
 	var tex_w := float(ROCK.get_width())
@@ -160,7 +202,10 @@ func _make_sprite(
 	spr.scale = Vector2(s, s)
 	spr.flip_h = _rng.randf() > 0.5
 	spr.modulate = modulate
-	spr.z_index = int(pos.y * 0.01)
+	# Platformer-style depth: lower on screen draws in front.
+	spr.z_as_relative = false
+	var foot_y := pos.y + float(tex.get_height()) * s * 0.45
+	spr.z_index = int(foot_y)
 	if apply_wind:
 		var mat := ShaderMaterial.new()
 		mat.shader = PROP_WIND
