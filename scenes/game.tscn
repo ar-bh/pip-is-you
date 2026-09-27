@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://cmqymg2k1w441" path="res://assets/acorn_found.png" id="11_found"]
 [ext_resource type="Texture2D" uid="uid://dnwvqv2o3skpr" path="res://assets/next_text.png" id="12_next"]
 [ext_resource type="Texture2D" uid="uid://d3u5ggipvybpn" path="res://assets/hint_text.png" id="13_hint"]
-[ext_resource type="FontFile" uid="uid://dw6jn85wuy0xw" path="res://assets/fonts/augiepixel.ttf" id="14_font"]
+[ext_resource type="FontFile" uid="uid://dmykv0uwg8xao" path="res://assets/fonts/fredoka.ttf" id="14_font"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")

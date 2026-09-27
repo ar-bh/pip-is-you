@@ -4,7 +4,7 @@
 [ext_resource type="Script" uid="uid://dgflneful8an" path="res://scripts/board.gd" id="2_p0vsl"]
 [ext_resource type="TileSet" uid="uid://cd88u2k78ds6d" path="res://assets/tiles/piece_tileset.tres" id="3_ngl01"]
 
-[node name="Level02" type="Node2D" unique_id=2126305567]
+[node name="Level03" type="Node2D" unique_id=2126305567]
 script = ExtResource("1_85vqe")
 hint_text = "can't break into the bushes. how do we change what YOU is"
 guide_text = "change up sentences by pushing new words to replace old words"

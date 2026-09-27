@@ -38,38 +38,35 @@ func rebuild(pieces: Array) -> void:
 			by_cell[key] = []
 		by_cell[key].append(piece)
 
-	_scan_lines(by_cell, true)
-	_scan_lines(by_cell, false)
-	_scan_you_is_noun(by_cell, true)
-	_scan_you_is_noun(by_cell, false)
+	# Straight lines only — both directions on each axis (no facing required).
+	for step: Vector2i in [Vector2i.RIGHT, Vector2i.LEFT, Vector2i.DOWN, Vector2i.UP]:
+		_scan_noun_is_property(by_cell, step)
+		_scan_property_is_noun(by_cell, step)
 
-func _scan_lines(by_cell: Dictionary, horizontal: bool) -> void:
-	var cells: Array = by_cell.keys()
-	for cell: Vector2i in cells:
-		var first: Piece = _noun_at(by_cell, cell)
-		if first == null:
+func _scan_noun_is_property(by_cell: Dictionary, step: Vector2i) -> void:
+	for cell: Vector2i in by_cell.keys():
+		var noun := _noun_at(by_cell, cell)
+		if noun == null:
 			continue
-		var second_cell := cell + (Vector2i.RIGHT if horizontal else Vector2i.DOWN)
-		var is_word := _word_at(by_cell, second_cell, &"is")
-		if is_word == null:
+		if _word_at(by_cell, cell + step, &"is") == null:
 			continue
-		var third_cell := second_cell + (Vector2i.RIGHT if horizontal else Vector2i.DOWN)
-		var property := _property_at(by_cell, third_cell)
+		var property := _property_at(by_cell, cell + step * 2)
 		if property == null:
 			continue
-		set_property(first.id, property.id)
+		set_property(noun.id, property.id)
 
-func _scan_you_is_noun(by_cell: Dictionary, horizontal: bool) -> void:
-	var step := Vector2i.RIGHT if horizontal else Vector2i.DOWN
+func _scan_property_is_noun(by_cell: Dictionary, step: Vector2i) -> void:
+	# e.g. GOAL IS ACORN / YOU IS PIP — same as noun IS property, just reversed order.
 	for cell: Vector2i in by_cell.keys():
-		if _word_at(by_cell, cell, &"you") == null:
+		var property := _property_at(by_cell, cell)
+		if property == null:
 			continue
 		if _word_at(by_cell, cell + step, &"is") == null:
 			continue
 		var noun := _noun_at(by_cell, cell + step * 2)
 		if noun == null:
 			continue
-		set_property(noun.id, &"you")
+		set_property(noun.id, property.id)
 
 func _noun_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 	if not by_cell.has(cell):

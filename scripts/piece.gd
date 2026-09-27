@@ -43,14 +43,10 @@ const SPRITES := {
 	"wall|1": preload("res://assets/tiles/wall_text.png"),
 }
 
-const UI_FONT := preload("res://assets/fonts/augiepixel.ttf")
-
-const PIP_DIR := {
-	Vector2i.DOWN: preload("res://assets/tiles/pip_down.png"),
-	Vector2i.UP: preload("res://assets/tiles/pip_up.png"),
-	Vector2i.RIGHT: preload("res://assets/tiles/pip_right.png"),
-	Vector2i.LEFT: preload("res://assets/tiles/pip_right.png"),
-}
+const UI_FONT := preload("res://assets/fonts/fredoka.ttf")
+const PIP_RIGHT := preload("res://assets/tiles/pip_right.png")
+const PIP_DOWN := preload("res://assets/tiles/pip_down.png")
+const PIP_UP := preload("res://assets/tiles/pip_up.png")
 
 var _board: Board
 var _sprite: Sprite2D
@@ -79,18 +75,27 @@ func set_facing(direction: Vector2i) -> void:
 func animate_to_cell(duration: float, reverse: bool = false) -> void:
 	if _move_tween != null and _move_tween.is_valid():
 		_move_tween.kill()
+	var dest := _board.cell_center(cell)
+	if reverse and _has_directional_art():
+		# Face opposite of travel — reversed playback of the normal move anim.
+		var delta := dest - position
+		var face := Vector2i.ZERO
+		if absf(delta.x) >= absf(delta.y) and absf(delta.x) > 0.01:
+			face = Vector2i.LEFT if delta.x > 0.0 else Vector2i.RIGHT
+		elif absf(delta.y) > 0.01:
+			face = Vector2i.UP if delta.y > 0.0 else Vector2i.DOWN
+		if face != Vector2i.ZERO:
+			set_facing(face)
 	_move_tween = create_tween()
 	_move_tween.set_trans(Tween.TRANS_QUAD)
-	# Forward uses ease-out; undo uses ease-in so it reads as that motion reversed.
 	_move_tween.set_ease(Tween.EASE_IN if reverse else Tween.EASE_OUT)
-	_move_tween.tween_property(self, "position", _board.cell_center(cell), duration)
+	_move_tween.tween_property(self, "position", dest, duration)
 	_move_tween.finished.connect(func() -> void:
 		snap_to_cell()
 		moved.emit()
 	)
 
 func refresh_depth() -> void:
-	# Lower on screen draws in front (same space as scenery trees).
 	z_as_relative = false
 	z_index = int(global_position.y)
 
@@ -112,11 +117,22 @@ func _sprite_key() -> String:
 func _apply_facing() -> void:
 	if _sprite == null or not _has_directional_art():
 		return
-	var dir := facing
-	if not PIP_DIR.has(dir):
-		dir = Vector2i.DOWN
-	_sprite.texture = PIP_DIR[dir]
-	_sprite.flip_h = dir == Vector2i.LEFT
+	match facing:
+		Vector2i.UP:
+			_sprite.texture = PIP_UP
+			_sprite.flip_h = false
+		Vector2i.DOWN:
+			_sprite.texture = PIP_DOWN
+			_sprite.flip_h = false
+		Vector2i.LEFT:
+			_sprite.texture = PIP_RIGHT
+			_sprite.flip_h = true
+		Vector2i.RIGHT:
+			_sprite.texture = PIP_RIGHT
+			_sprite.flip_h = false
+		_:
+			_sprite.texture = PIP_DOWN
+			_sprite.flip_h = false
 	_fit_sprite(_sprite)
 
 func _fit_sprite(sprite: Sprite2D) -> void:
@@ -140,7 +156,7 @@ func _build_visual() -> void:
 	_sprite = null
 
 	if _has_directional_art():
-		_sprite = _make_sprite(PIP_DIR[Vector2i.DOWN])
+		_sprite = _make_sprite(PIP_DOWN)
 		add_child(_sprite)
 		_apply_facing()
 		return

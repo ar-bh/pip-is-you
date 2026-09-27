@@ -1,11 +1,11 @@
-[gd_resource type="Theme" load_steps=2 format=3]
+[gd_resource type="Theme" format=3 uid="uid://dig6aq312yfq0"]
 
-[ext_resource type="FontFile" path="res://assets/fonts/augiepixel.ttf" id="1_augie"]
+[ext_resource type="FontFile" uid="uid://dmykv0uwg8xao" path="res://assets/fonts/fredoka.ttf" id="1_fredoka"]
 
 [resource]
-default_font = ExtResource("1_augie")
+default_font = ExtResource("1_fredoka")
 default_font_size = 24
 Button/font_sizes/font_size = 22
-Button/fonts/font = ExtResource("1_augie")
+Button/fonts/font = ExtResource("1_fredoka")
 Label/font_sizes/font_size = 24
-Label/fonts/font = ExtResource("1_augie")
+Label/fonts/font = ExtResource("1_fredoka")

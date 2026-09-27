@@ -7,9 +7,9 @@
 [node name="Level01" type="Node2D" unique_id=2089078812]
 script = ExtResource("1_81a5f")
 hint_text = "go touch the acorn (remember to read the boxes)"
-guide_text = "arrows and WASD to move (z to undo)
-read the words at the top
-go next to the goal"
+guide_text = "use arrow keys and WASD to move
+undo a move using Z
+restart a level using R"
 
 [node name="Board" type="Node2D" parent="." unique_id=1604006610]
 script = ExtResource("2_gg43x")

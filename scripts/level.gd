@@ -282,21 +282,13 @@ func _undo() -> void:
 	_won = false
 	var previous: Array = _history.pop_back()
 	var moving := false
-	var you_set: Dictionary = {}
-	for you in _yous():
-		you_set[you] = true
 	for i in pieces.size():
 		if i >= previous.size():
 			break
 		var target: Vector2i = previous[i]
-		var from: Vector2i = pieces[i].cell
-		if from == target:
+		if pieces[i].cell == target:
 			continue
-		var undo_dir := target - from
 		pieces[i].cell = target
-		# Face the way the undo slide goes (opposite of the original move).
-		if you_set.has(pieces[i]):
-			pieces[i].set_facing(undo_dir)
 		pieces[i].animate_to_cell(STEP_DURATION, true)
 		moving = true
 	if moving:

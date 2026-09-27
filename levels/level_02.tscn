@@ -4,10 +4,10 @@
 [ext_resource type="Script" uid="uid://dgflneful8an" path="res://scripts/board.gd" id="2_p0vsl"]
 [ext_resource type="TileSet" uid="uid://cd88u2k78ds6d" path="res://assets/tiles/piece_tileset.tres" id="3_ngl01"]
 
-[node name="Level03" type="Node2D" unique_id=2126305567]
+[node name="Level02" type="Node2D" unique_id=2126305567]
 script = ExtResource("1_85vqe")
-hint_text = "try disconnecting STOP from BUSH IS"
-guide_text = "push words by walking into them. pushing words lets you break sentences."
+hint_text = "try disconnecting the STOP word from the BUSH and IS words to make the bushes stop blocking you"
+guide_text = "push words by walking into them. pushing words lets you break and build sentences."
 
 [node name="Board" type="Node2D" parent="." unique_id=648545739]
 script = ExtResource("2_p0vsl")
