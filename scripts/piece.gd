@@ -51,6 +51,7 @@ const PIP_DIR := {
 var _board: Board
 var _sprite: Sprite2D
 var facing: Vector2i = Vector2i.DOWN
+var _move_tween: Tween
 
 func setup(board: Board, at: Vector2i, text: bool, piece_id: StringName) -> void:
 	_board = board
@@ -70,11 +71,15 @@ func set_facing(direction: Vector2i) -> void:
 	facing = direction
 	_apply_facing()
 
-func animate_to_cell(duration: float) -> void:
-	var tween := create_tween()
-	tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "position", _board.cell_center(cell), duration)
-	tween.finished.connect(func() -> void:
+func animate_to_cell(duration: float, reverse: bool = false) -> void:
+	if _move_tween != null and _move_tween.is_valid():
+		_move_tween.kill()
+	_move_tween = create_tween()
+	_move_tween.set_trans(Tween.TRANS_QUAD)
+	# Forward uses ease-out; undo uses ease-in so it reads as that motion reversed.
+	_move_tween.set_ease(Tween.EASE_IN if reverse else Tween.EASE_OUT)
+	_move_tween.tween_property(self, "position", _board.cell_center(cell), duration)
+	_move_tween.finished.connect(func() -> void:
 		snap_to_cell()
 		moved.emit()
 	)
