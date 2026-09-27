@@ -22,6 +22,9 @@ func piece_has(piece: Piece, property: StringName) -> bool:
 		return true
 	if piece.id == &"acorn" and property == &"push" and not has_property(&"acorn", &"you"):
 		return true
+	# Pip (the squirrel) is pushable unless PIP IS YOU / STOP.
+	if piece.id == &"pip" and property == &"push" and not has_property(&"pip", &"you") and not has_property(&"pip", &"stop"):
+		return true
 	# Bushes are pushable unless BUSH IS STOP (or YOU) is active.
 	if piece.id == &"bush" and property == &"push" and not has_property(&"bush", &"you") and not has_property(&"bush", &"stop"):
 		return true

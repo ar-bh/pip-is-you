@@ -1,7 +1,6 @@
 extends Control
 
-const GAME_SCENE := "res://scenes/game.tscn"
-const COMICS: Array[String] = [
+const DEFAULT_COMICS: Array[String] = [
 	"res://assets/comics/comic1.png",
 	"res://assets/comics/comic2.png",
 	"res://assets/comics/comic3.png",
@@ -12,6 +11,10 @@ const PARALLAX_SPEED := 12.0
 const GRID_MARGIN := 36.0
 const GRID_GAP := 18.0
 const NEXT_HEIGHT := 72.0
+
+@export var comic_paths: Array[String] = []
+@export var next_scene_path: String = "res://scenes/game.tscn"
+@export var parallax_texture: Texture2D
 
 @onready var parallax_a: TextureRect = $Parallax/LayerA
 @onready var parallax_b: TextureRect = $Parallax/LayerB
@@ -25,6 +28,11 @@ var _scroll := 0.0
 
 func _ready() -> void:
 	App.ensure_music()
+	if comic_paths.is_empty():
+		comic_paths = DEFAULT_COMICS.duplicate()
+	if parallax_texture != null:
+		parallax_a.texture = parallax_texture
+		parallax_b.texture = parallax_texture
 	next_btn.pressed.connect(_on_next)
 	get_viewport().size_changed.connect(_fit_layout)
 	_build_panels()
@@ -48,7 +56,7 @@ func _build_panels() -> void:
 	for child in panels_root.get_children():
 		child.queue_free()
 	_panels.clear()
-	for path in COMICS:
+	for path in comic_paths:
 		var panel := TextureRect.new()
 		panel.texture = load(path)
 		panel.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -126,6 +134,6 @@ func _reveal_next() -> void:
 func _on_next() -> void:
 	if _revealed >= _panels.size():
 		App.ensure_music()
-		get_tree().change_scene_to_file(GAME_SCENE)
+		get_tree().change_scene_to_file(next_scene_path)
 		return
 	_reveal_next()

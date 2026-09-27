@@ -27,12 +27,19 @@ var _level: Level
 var _guide_base_y := 0.0
 var _guide_phase := 0.0
 var _undo_hint_active := false
+var _guide_fade := 1.0
+var _guide_covering := false
+## First board row whose cell overlaps the guide band. Fade while YOU is on/below it.
+var _guide_fade_min_row := 999
 var _flash: ColorRect
 var _flash_tween: Tween
 
 const _GUIDE_COLOR := Color(0.08, 0.08, 0.08, 1)
 const _UNDO_HINT_COLOR := Color(0.55, 0.28, 0.05, 1)
 const _FLASH_COLOR := Color(0.85, 0.08, 0.08, 0.55)
+const _GUIDE_FADE_ALPHA := 0.08
+const _GUIDE_FADE_SPEED := 5.0
+const _GUIDE_BOB := 3.0
 
 func _ready() -> void:
 	if auto_discover_levels:
@@ -44,6 +51,8 @@ func _ready() -> void:
 			load("res://levels/level_01.tscn"),
 			load("res://levels/level_02.tscn"),
 			load("res://levels/level_03.tscn"),
+			load("res://levels/level_04.tscn"),
+			load("res://levels/level_05.tscn"),
 		]
 	App.ensure_music()
 	next_btn.pressed.connect(_next_level)
@@ -136,7 +145,9 @@ func _load_current() -> void:
 	_center_level()
 
 func _on_rules_changed(_text: String) -> void:
-	_refresh_guide_ui()
+	# Only update guide copy / undo-hint mode. Never reset fade here —
+	# rules_changed fires after every move and was causing the opaque flash.
+	_refresh_guide_ui(false)
 
 func _refresh_hint_ui() -> void:
 	var text := ""
@@ -148,7 +159,7 @@ func _refresh_hint_ui() -> void:
 	hint_panel.visible = false
 	_fit_hint_ui()
 
-func _refresh_guide_ui() -> void:
+func _refresh_guide_ui(reset_fade: bool = true) -> void:
 	var was_undo_hint := _undo_hint_active
 	_undo_hint_active = false
 	if _level and is_instance_valid(_level) and not _level.has_won() and not _level.has_you():
@@ -167,8 +178,12 @@ func _refresh_guide_ui() -> void:
 		guide_plate.visible = not text.is_empty()
 		guide_label.add_theme_color_override("font_color", _GUIDE_COLOR)
 		guide_label.add_theme_font_size_override("font_size", 24)
-	guide_plate.modulate = Color.WHITE
+	if reset_fade:
+		_guide_fade = 1.0
+		_guide_covering = false
+		guide_plate.modulate = Color.WHITE
 	_fit_guide_ui()
+	_recompute_guide_fade_rows()
 
 func _flash_no_you() -> void:
 	if _flash == null:
@@ -218,17 +233,58 @@ func _fit_guide_ui() -> void:
 	var draw_w := plate_size.x * guide_plate.scale.x
 	_guide_base_y = view.y - plate_size.y * guide_plate.scale.y - 20.0
 	guide_plate.position = Vector2((view.x - draw_w) * 0.5, _guide_base_y)
+	_recompute_guide_fade_rows()
+
+func _recompute_guide_fade_rows() -> void:
+	# Map guide overlap to discrete board rows so fade never depends on
+	# animated sprite positions (which caused mid-move flashing).
+	_guide_fade_min_row = 999
+	if _level == null or not is_instance_valid(_level) or guide_plate == null:
+		return
+	var board: Board = _level.get_node_or_null("Board") as Board
+	var pieces_root := _level.get_node_or_null("Pieces") as Node2D
+	if board == null or pieces_root == null:
+		return
+	var xform := pieces_root.get_global_transform_with_canvas()
+	var pad := float(board.cell_size) * 0.4
+	var mid_x := board.columns / 2
+	for y in range(board.rows):
+		var cy := (xform * board.cell_center(Vector2i(mid_x, y))).y
+		if cy + pad >= _guide_base_y:
+			_guide_fade_min_row = y
+			return
+
+func _guide_should_fade() -> bool:
+	if guide_plate == null or not guide_plate.visible:
+		return false
+	# Mouse over the stable bottom guide band (ignores bob).
+	var view := get_viewport().get_visible_rect()
+	var guide_h := guide_plate.size.y * guide_plate.scale.y
+	var band := Rect2(0.0, _guide_base_y - 12.0, view.size.x, guide_h + 32.0)
+	if band.has_point(get_viewport().get_mouse_position()):
+		return true
+	if _level == null or not is_instance_valid(_level):
+		return false
+	for piece in _level.get_you_pieces():
+		if piece != null and is_instance_valid(piece) and piece.cell.y >= _guide_fade_min_row:
+			return true
+	return false
 
 func _update_guide(delta: float) -> void:
 	if guide_plate == null or not guide_plate.visible:
 		return
 	_guide_phase += delta * 2.2
-	guide_plate.position.y = _guide_base_y + sin(_guide_phase) * 3.0
-	if _undo_hint_active:
+	var bob := sin(_guide_phase) * _GUIDE_BOB
+	guide_plate.position.y = _guide_base_y + bob
+
+	_guide_covering = _guide_should_fade()
+	var target := _GUIDE_FADE_ALPHA if _guide_covering else 1.0
+	_guide_fade = move_toward(_guide_fade, target, _GUIDE_FADE_SPEED * delta)
+	var c := Color(1, 1, 1, _guide_fade)
+	if _undo_hint_active and not _guide_covering:
 		var pulse := 0.88 + 0.12 * (0.5 + 0.5 * sin(_guide_phase * 2.4))
-		guide_plate.modulate = Color(pulse, pulse, pulse, 1.0)
-	else:
-		guide_plate.modulate = Color.WHITE
+		c = Color(pulse, pulse, pulse, _guide_fade)
+	guide_plate.modulate = c
 
 func _center_level() -> void:
 	if _level == null or not is_instance_valid(_level):
@@ -247,18 +303,21 @@ func _center_level() -> void:
 		scenery.rebuild(level_host.position, board_size, view, _index, blocked, cell_r)
 	for piece in _level.pieces:
 		piece.refresh_depth()
+	_recompute_guide_fade_rows()
 
 func _next_level() -> void:
 	if _index + 1 >= levels.size():
-		win_art.visible = true
-		next_btn.visible = false
-		win_panel.visible = true
+		App.ensure_music()
+		get_tree().change_scene_to_file("res://scenes/end_comic.tscn")
 		return
 	_index += 1
 	_load_current()
 
 func get_level_index() -> int:
 	return _index
+
+func get_level_count() -> int:
+	return levels.size()
 
 func go_back_level() -> void:
 	if _index <= 0:
@@ -267,12 +326,15 @@ func go_back_level() -> void:
 	win_panel.visible = false
 	_load_current()
 
+func skip_level() -> void:
+	_next_level()
+
 func _on_level_won() -> void:
 	hint_panel.visible = false
 	hint_btn_plate.visible = false
 	hint_btn.visible = false
 	guide_plate.visible = false
 	win_art.visible = true
-	next_btn.visible = _index + 1 < levels.size()
+	next_btn.visible = true
 	win_panel.visible = true
 	tada.play()

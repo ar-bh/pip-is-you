@@ -20,6 +20,7 @@ var _settings_btn: TextureButton
 var _panel: PanelContainer
 var _slider: HSlider
 var _back_level_btn: Button
+var _skip_level_btn: Button
 var _menu_btn: Button
 var _volume := 0.75
 var _panel_open := false
@@ -138,9 +139,13 @@ func _build_settings_ui() -> void:
 	_slider.value_changed.connect(set_volume)
 	vbox.add_child(_slider)
 
-	_back_level_btn = _make_settings_button("Back level")
+	_back_level_btn = _make_settings_button("Previous level")
 	_back_level_btn.pressed.connect(_back_level)
 	vbox.add_child(_back_level_btn)
+
+	_skip_level_btn = _make_settings_button("Skip level")
+	_skip_level_btn.pressed.connect(_skip_level)
+	vbox.add_child(_skip_level_btn)
 
 	_menu_btn = _make_settings_button("Return to menu")
 	_menu_btn.pressed.connect(_return_to_menu)
@@ -196,6 +201,13 @@ func _update_settings_buttons() -> void:
 	_menu_btn.visible = not on_title
 	if _back_level_btn:
 		_back_level_btn.visible = on_game and int(scene.call("get_level_index")) > 0
+	if _skip_level_btn:
+		var can_skip := false
+		if on_game and scene.has_method("get_level_count"):
+			can_skip = int(scene.call("get_level_index")) + 1 < int(scene.call("get_level_count"))
+		elif on_game:
+			can_skip = true
+		_skip_level_btn.visible = can_skip
 
 func _toggle_panel() -> void:
 	_panel_open = not _panel_open
@@ -210,6 +222,14 @@ func _back_level() -> void:
 	_panel_open = false
 	_panel.visible = false
 	scene.call("go_back_level")
+
+func _skip_level() -> void:
+	var scene := get_tree().current_scene
+	if scene == null or not scene.has_method("skip_level"):
+		return
+	_panel_open = false
+	_panel.visible = false
+	scene.call("skip_level")
 
 func _return_to_menu() -> void:
 	_panel_open = false
