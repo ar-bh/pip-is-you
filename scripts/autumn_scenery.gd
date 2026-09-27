@@ -2,8 +2,9 @@ class_name AutumnScenery
 extends Node2D
 
 const TREES: Array[Texture2D] = [
-	preload("res://assets/tiles/tree_1.png"),
-	preload("res://assets/tiles/tree_2.png"),
+	preload("res://assets/tiles/tree_1.png"),  # yellow
+	preload("res://assets/tiles/tree_2.png"),  # orange
+	preload("res://assets/tiles/tree_3.png"),  # amber
 ]
 const ROCK := preload("res://assets/tiles/rock_1.png")
 const PROP_WIND := preload("res://shaders/prop_wind.gdshader")
@@ -18,7 +19,7 @@ const PROP_WIND := preload("res://shaders/prop_wind.gdshader")
 @export var map_rock_count: int = 8
 @export var map_rock_scale_min: float = 0.55
 @export var map_rock_scale_max: float = 1.1
-@export var tree_brighten: Color = Color(1.35, 1.28, 1.12, 1.0)
+@export var tree_brighten: Color = Color(1.08, 1.04, 0.98, 1.0)
 
 var _board_rect := Rect2()
 var _view_size := Vector2(960, 640)

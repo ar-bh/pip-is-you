@@ -6,12 +6,13 @@
 
 [node name="Level01" type="Node2D" unique_id=2089078812]
 script = ExtResource("1_81a5f")
+hint_text = "go touch the acorn (remember to read the boxes)"
 
 [node name="Board" type="Node2D" parent="." unique_id=1604006610]
 script = ExtResource("2_gg43x")
 
 [node name="TileMap" type="TileMapLayer" parent="." unique_id=122690828]
-tile_map_data = PackedByteArray("AAADAAQAAAABAAAAAAALAAQAAAACAAAAAAAEAAQAAAAFAAAAAAAEAAUAAAAJAAAAAAAEAAYAAAAKAAAAAAAKAAQAAAAGAAAAAAAKAAUAAAAJAAAAAAAKAAYAAAALAAAAAAA=")
+tile_map_data = PackedByteArray("AAACAAEAAAAFAAAAAAADAAEAAAAJAAAAAAAJAAEAAAAJAAAAAAAKAAEAAAALAAAAAAAIAAEAAAAGAAAAAAAEAAEAAAAKAAAAAAAJAAQAAAACAAAAAAADAAQAAAABAAAAAAA=")
 tile_set = ExtResource("3_mllcm")
 
 [node name="Pieces" type="Node2D" parent="." unique_id=809543884]

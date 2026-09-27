@@ -9,6 +9,9 @@ extends Node2D
 @onready var win_panel: Control = $UI/WinPanel
 @onready var win_art: TextureRect = $UI/WinPanel/Panel/VBox/WinArt
 @onready var next_btn: TextureButton = $UI/WinPanel/Panel/VBox/NextButton
+@onready var hint_btn: TextureButton = $UI/HintButton
+@onready var hint_panel: PanelContainer = $UI/HintPanel
+@onready var hint_label: Label = $UI/HintPanel/Margin/HintLabel
 @onready var tada: AudioStreamPlayer = $Tada
 
 var _index := 0
@@ -22,9 +25,13 @@ func _ready() -> void:
 		]
 	App.ensure_music()
 	next_btn.pressed.connect(_next_level)
+	hint_btn.pressed.connect(_toggle_hint)
+	hint_panel.visible = false
 	win_panel.visible = false
 	level_host.visible = true
 	get_viewport().size_changed.connect(_center_level)
+	get_viewport().size_changed.connect(_fit_hint_ui)
+	_fit_hint_ui()
 	_load_current()
 
 func _process(delta: float) -> void:
@@ -45,9 +52,11 @@ func _load_current() -> void:
 	if _level:
 		_level.queue_free()
 		_level = null
+	hint_panel.visible = false
 	if _index < 0 or _index >= levels.size() or levels[_index] == null:
 		win_art.visible = false
 		next_btn.visible = false
+		hint_btn.visible = false
 		win_panel.visible = true
 		return
 	_level = levels[_index].instantiate()
@@ -56,8 +65,34 @@ func _load_current() -> void:
 	level_host.add_child(_level)
 	_level.won.connect(_on_level_won)
 	win_panel.visible = false
+	_refresh_hint_ui()
 	await get_tree().process_frame
 	_center_level()
+
+func _refresh_hint_ui() -> void:
+	var text := ""
+	if _level:
+		text = _level.hint_text.strip_edges()
+	hint_btn.visible = not text.is_empty()
+	hint_label.text = text
+	hint_panel.visible = false
+	_fit_hint_ui()
+
+func _toggle_hint() -> void:
+	if hint_label.text.is_empty():
+		return
+	hint_panel.visible = not hint_panel.visible
+	_fit_hint_ui()
+
+func _fit_hint_ui() -> void:
+	var view := get_viewport().get_visible_rect().size
+	var margin := 16.0
+	hint_btn.position = Vector2(margin, margin)
+	hint_panel.reset_size()
+	var panel_size := hint_panel.get_combined_minimum_size()
+	panel_size.x = clampf(panel_size.x, 180.0, minf(360.0, view.x - margin * 2.0))
+	hint_panel.size = panel_size
+	hint_panel.position = Vector2(margin, margin + hint_btn.size.y + 8.0)
 
 func _center_level() -> void:
 	if _level == null or not is_instance_valid(_level):
@@ -81,6 +116,8 @@ func _next_level() -> void:
 	_load_current()
 
 func _on_level_won() -> void:
+	hint_panel.visible = false
+	hint_btn.visible = false
 	win_art.visible = true
 	next_btn.visible = _index + 1 < levels.size()
 	win_panel.visible = true

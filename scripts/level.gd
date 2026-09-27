@@ -14,6 +14,7 @@ const HOLD_REPEAT_DELAY := 0.28
 
 @export var move_trail_enabled: bool = false
 @export var move_trail_fade_enabled: bool = false
+@export_multiline var hint_text: String = ""
 
 var rules := RuleBook.new()
 var pieces: Array[Piece] = []

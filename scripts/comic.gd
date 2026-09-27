@@ -7,6 +7,7 @@ const COMICS: Array[String] = [
 	"res://assets/comics/comic3.png",
 	"res://assets/comics/comic4.png",
 	"res://assets/comics/comic5.png",
+	"res://assets/comics/comic6.png",
 ]
 const PARALLAX_SPEED := 12.0
 const GRID_MARGIN := 36.0
@@ -83,25 +84,24 @@ func _fit_grid(view: Vector2) -> void:
 		view.x - GRID_MARGIN * 2.0,
 		view.y - GRID_MARGIN * 2.0 - bottom_reserve,
 	)
-	var cell_w := (area.size.x - GRID_GAP * 2.0) / 3.0
-	var cell_h := (area.size.y - GRID_GAP) / 2.0
+	var cols := 3
+	var rows := 2
+	var cell_w := (area.size.x - GRID_GAP * float(cols - 1)) / float(cols)
+	var cell_h := (area.size.y - GRID_GAP * float(rows - 1)) / float(rows)
 	var cell := minf(cell_w, cell_h)
-	var row1_w := cell * 3.0 + GRID_GAP * 2.0
-	var row2_w := cell * 2.0 + GRID_GAP
-	var grid_h := cell * 2.0 + GRID_GAP
+	var grid_w := cell * float(cols) + GRID_GAP * float(cols - 1)
+	var grid_h := cell * float(rows) + GRID_GAP * float(rows - 1)
 	var origin := Vector2(
-		area.position.x + (area.size.x - row1_w) * 0.5,
+		area.position.x + (area.size.x - grid_w) * 0.5,
 		area.position.y + (area.size.y - grid_h) * 0.5,
 	)
-	var positions: Array[Vector2] = [
-		origin + Vector2(0.0, 0.0),
-		origin + Vector2(cell + GRID_GAP, 0.0),
-		origin + Vector2((cell + GRID_GAP) * 2.0, 0.0),
-		origin + Vector2((row1_w - row2_w) * 0.5, cell + GRID_GAP),
-		origin + Vector2((row1_w - row2_w) * 0.5 + cell + GRID_GAP, cell + GRID_GAP),
-	]
 	for i in _panels.size():
-		_panels[i].position = positions[i]
+		var col := i % cols
+		var row := int(i / cols)
+		_panels[i].position = origin + Vector2(
+			float(col) * (cell + GRID_GAP),
+			float(row) * (cell + GRID_GAP),
+		)
 		_panels[i].size = Vector2(cell, cell)
 
 func _fit_next(view: Vector2) -> void:

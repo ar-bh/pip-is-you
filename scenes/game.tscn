@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://levels/level_01.tscn" id="2_level1"]
@@ -11,6 +11,7 @@
 [ext_resource type="AudioStream" uid="uid://btadasoundfx01" path="res://assets/tada.mp3" id="10_tada"]
 [ext_resource type="Texture2D" path="res://assets/acorn_found.png" id="11_found"]
 [ext_resource type="Texture2D" path="res://assets/next_text.png" id="12_next"]
+[ext_resource type="Texture2D" path="res://assets/hint_text.png" id="13_hint"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")
@@ -38,6 +39,22 @@ content_margin_left = 28.0
 content_margin_top = 22.0
 content_margin_right = 28.0
 content_margin_bottom = 22.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hint"]
+bg_color = Color(0.98, 0.93, 0.86, 0.96)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.22, 0.16, 0.9)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 12.0
 
 [node name="Game" type="Node2D"]
 script = ExtResource("1_game")
@@ -76,6 +93,39 @@ script = ExtResource("7_leaves")
 
 [node name="UI" type="CanvasLayer" parent="."]
 layer = 10
+
+[node name="HintButton" type="TextureButton" parent="UI"]
+custom_minimum_size = Vector2(120, 48)
+offset_right = 120.0
+offset_bottom = 48.0
+texture_normal = ExtResource("13_hint")
+ignore_texture_size = true
+stretch_mode = 5
+texture_filter = 1
+
+[node name="HintPanel" type="PanelContainer" parent="UI"]
+visible = false
+offset_left = 16.0
+offset_top = 72.0
+offset_right = 280.0
+offset_bottom = 140.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_hint")
+
+[node name="Margin" type="MarginContainer" parent="UI/HintPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 4
+theme_override_constants/margin_top = 2
+theme_override_constants/margin_right = 4
+theme_override_constants/margin_bottom = 2
+
+[node name="HintLabel" type="Label" parent="UI/HintPanel/Margin"]
+custom_minimum_size = Vector2(200, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.28, 0.16, 0.1, 1)
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 3
+text = ""
 
 [node name="WinPanel" type="CenterContainer" parent="UI"]
 visible = false

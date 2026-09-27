@@ -19,6 +19,9 @@ func piece_has(piece: Piece, property: StringName) -> bool:
 		return property == &"push"
 	if piece.id == &"acorn" and property == &"push" and not has_property(&"acorn", &"you"):
 		return true
+	# Bushes are pushable unless BUSH IS STOP (or YOU) is active.
+	if piece.id == &"bush" and property == &"push" and not has_property(&"bush", &"you") and not has_property(&"bush", &"stop"):
+		return true
 	return has_property(piece.id, property)
 
 func rebuild(pieces: Array) -> void:

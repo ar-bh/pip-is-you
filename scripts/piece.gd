@@ -23,17 +23,20 @@ const WORD_COLORS := {
 	&"is": Color(0.85, 0.85, 0.85),
 	&"you": Color(0.95, 0.35, 0.55),
 	&"win": Color(0.95, 0.82, 0.25),
-	&"stop": Color(0.45, 0.55, 0.85),
+	&"stop": Color(0.67, 0.2, 0.2),
 	&"push": Color(0.45, 0.75, 0.55),
 }
 
 const SPRITES := {
 	"acorn|0": preload("res://assets/tiles/acorn.png"),
 	"acorn|1": preload("res://assets/tiles/acorn_text.png"),
+	"bush|0": preload("res://assets/tiles/bush.png"),
+	"bush|1": preload("res://assets/tiles/bush_text.png"),
 	"pip|1": preload("res://assets/tiles/pip_text.png"),
 	"is|1": preload("res://assets/tiles/is_text.png"),
 	"you|1": preload("res://assets/tiles/you_text.png"),
 	"win|1": preload("res://assets/tiles/win_text.png"),
+	"stop|1": preload("res://assets/tiles/stop_text.png"),
 }
 
 const PIP_DIR := {

@@ -4,6 +4,7 @@ const CURSOR := preload("res://assets/mouse.png")
 const MUSIC_STREAM := preload("res://assets/spring-wild-horseradish-jam.mp3")
 const SETTINGS_ICON := preload("res://assets/settings.png")
 const SOUND_TEXT := preload("res://assets/sound_text.png")
+const TITLE_SCENE := "res://scenes/title.tscn"
 const CURSOR_SCALE := 3
 const SETTINGS_BTN_SIZE := 48.0
 
@@ -17,6 +18,7 @@ var _ui_layer: CanvasLayer
 var _settings_btn: TextureButton
 var _panel: PanelContainer
 var _slider: HSlider
+var _menu_btn: Button
 var _volume := 0.75
 var _panel_open := false
 
@@ -134,12 +136,36 @@ func _build_settings_ui() -> void:
 	_slider.value_changed.connect(set_volume)
 	vbox.add_child(_slider)
 
+	_menu_btn = Button.new()
+	_menu_btn.text = "Return to menu"
+	_menu_btn.focus_mode = Control.FOCUS_NONE
+	_menu_btn.custom_minimum_size = Vector2(180, 32)
+	_menu_btn.add_theme_font_size_override("font_size", 15)
+	_menu_btn.add_theme_color_override("font_color", Color(0.28, 0.16, 0.1, 1))
+	_menu_btn.add_theme_color_override("font_hover_color", Color(0.45, 0.22, 0.12, 1))
+	_menu_btn.add_theme_color_override("font_pressed_color", Color(0.18, 0.1, 0.06, 1))
+	var btn_style := StyleBoxFlat.new()
+	btn_style.bg_color = Color(0.92, 0.82, 0.7, 1)
+	btn_style.set_corner_radius_all(6)
+	btn_style.content_margin_left = 10
+	btn_style.content_margin_right = 10
+	btn_style.content_margin_top = 6
+	btn_style.content_margin_bottom = 6
+	_menu_btn.add_theme_stylebox_override("normal", btn_style)
+	var btn_hover := btn_style.duplicate()
+	btn_hover.bg_color = Color(0.95, 0.88, 0.78, 1)
+	_menu_btn.add_theme_stylebox_override("hover", btn_hover)
+	_menu_btn.add_theme_stylebox_override("pressed", btn_hover)
+	_menu_btn.pressed.connect(_return_to_menu)
+	vbox.add_child(_menu_btn)
+
 func _fit_settings_ui() -> void:
 	if _settings_btn == null:
 		return
 	var view := get_viewport().get_visible_rect().size
 	var margin := 16.0
 	_settings_btn.position = Vector2(view.x - SETTINGS_BTN_SIZE - margin, margin)
+	_update_menu_button()
 	_panel.reset_size()
 	var panel_size := _panel.get_combined_minimum_size()
 	if panel_size.x < 200.0:
@@ -150,11 +176,24 @@ func _fit_settings_ui() -> void:
 		margin + SETTINGS_BTN_SIZE + 8.0,
 	)
 
+func _update_menu_button() -> void:
+	if _menu_btn == null:
+		return
+	var scene := get_tree().current_scene
+	var on_title := scene != null and String(scene.scene_file_path).ends_with("title.tscn")
+	_menu_btn.visible = not on_title
+
 func _toggle_panel() -> void:
 	_panel_open = not _panel_open
 	_panel.visible = _panel_open
 	if _panel_open:
 		_fit_settings_ui()
+
+func _return_to_menu() -> void:
+	_panel_open = false
+	_panel.visible = false
+	ensure_music()
+	get_tree().change_scene_to_file(TITLE_SCENE)
 
 func _apply_cursor(pressed: bool) -> void:
 	Input.set_custom_mouse_cursor(
