@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
 [ext_resource type="PackedScene" path="res://levels/level_01.tscn" id="2_level1"]
@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://scripts/falling_leaves.gd" id="7_leaves"]
 [ext_resource type="Script" path="res://scripts/autumn_scenery.gd" id="8_scenery"]
 [ext_resource type="AudioStream" uid="uid://btadasoundfx01" path="res://assets/tada.mp3" id="10_tada"]
+[ext_resource type="Texture2D" path="res://assets/acorn_found.png" id="11_found"]
+[ext_resource type="Texture2D" path="res://assets/next_text.png" id="12_next"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")
@@ -22,12 +24,12 @@ shader_parameter/wind_scale = 14.0
 shader_parameter/texture_mix = 0.55
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_win"]
-bg_color = Color(0.22, 0.12, 0.08, 0.88)
+bg_color = Color(0.98, 0.93, 0.86, 0.96)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.92, 0.62, 0.38, 0.85)
+border_color = Color(0.35, 0.22, 0.16, 0.9)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
@@ -85,28 +87,29 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Panel" type="PanelContainer" parent="UI/WinPanel"]
-custom_minimum_size = Vector2(360, 120)
+custom_minimum_size = Vector2(320, 160)
 layout_mode = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_win")
 
 [node name="VBox" type="VBoxContainer" parent="UI/WinPanel/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
-[node name="WinTitle" type="Label" parent="UI/WinPanel/Panel/VBox"]
+[node name="WinArt" type="TextureRect" parent="UI/WinPanel/Panel/VBox"]
+custom_minimum_size = Vector2(280, 100)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.93, 0.78, 1)
-theme_override_colors/font_shadow_color = Color(0.12, 0.05, 0.02, 0.75)
-theme_override_constants/shadow_offset_x = 1
-theme_override_constants/shadow_offset_y = 1
-theme_override_font_sizes/font_size = 24
-horizontal_alignment = 1
-text = "Pip found an acorn"
+mouse_filter = 2
+texture = ExtResource("11_found")
+expand_mode = 1
+stretch_mode = 5
+texture_filter = 1
 
-[node name="WinHint" type="Label" parent="UI/WinPanel/Panel/VBox"]
+[node name="NextButton" type="TextureButton" parent="UI/WinPanel/Panel/VBox"]
+custom_minimum_size = Vector2(160, 56)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.72, 0.9)
-theme_override_font_sizes/font_size = 14
-horizontal_alignment = 1
-text = "Enter — next clearing"
+size_flags_horizontal = 4
+texture_normal = ExtResource("12_next")
+ignore_texture_size = true
+stretch_mode = 5
+texture_filter = 1

@@ -7,8 +7,8 @@ extends Node2D
 @onready var level_host: Node2D = $LevelHost
 @onready var scenery: AutumnScenery = $AutumnScenery
 @onready var win_panel: Control = $UI/WinPanel
-@onready var win_title: Label = $UI/WinPanel/Panel/VBox/WinTitle
-@onready var win_hint: Label = $UI/WinPanel/Panel/VBox/WinHint
+@onready var win_art: TextureRect = $UI/WinPanel/Panel/VBox/WinArt
+@onready var next_btn: TextureButton = $UI/WinPanel/Panel/VBox/NextButton
 @onready var tada: AudioStreamPlayer = $Tada
 
 var _index := 0
@@ -21,6 +21,7 @@ func _ready() -> void:
 			load("res://levels/level_02.tscn"),
 		]
 	App.ensure_music()
+	next_btn.pressed.connect(_next_level)
 	win_panel.visible = false
 	level_host.visible = true
 	get_viewport().size_changed.connect(_center_level)
@@ -35,10 +36,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		_load_current()
 		get_viewport().set_input_as_handled()
 		return
-	if _level and _level.has_won() and event.is_action_pressed("ui_accept"):
-		_next_level()
-		get_viewport().set_input_as_handled()
-		return
 	if _level and _level.handle_input(event):
 		if not _level.has_won():
 			win_panel.visible = false
@@ -49,8 +46,8 @@ func _load_current() -> void:
 		_level.queue_free()
 		_level = null
 	if _index < 0 or _index >= levels.size() or levels[_index] == null:
-		win_title.text = "No clearings found"
-		win_hint.text = ""
+		win_art.visible = false
+		next_btn.visible = false
 		win_panel.visible = true
 		return
 	_level = levels[_index].instantiate()
@@ -76,16 +73,15 @@ func _center_level() -> void:
 
 func _next_level() -> void:
 	if _index + 1 >= levels.size():
-		win_title.text = "All the acorns are gathered"
-		win_hint.text = "R to wander this clearing again"
+		win_art.visible = true
+		next_btn.visible = false
 		win_panel.visible = true
-		tada.play()
 		return
 	_index += 1
 	_load_current()
 
 func _on_level_won() -> void:
-	win_title.text = "Pip found an acorn"
-	win_hint.text = "Enter — next clearing"
+	win_art.visible = true
+	next_btn.visible = _index + 1 < levels.size()
 	win_panel.visible = true
 	tada.play()

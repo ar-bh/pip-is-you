@@ -34,7 +34,7 @@ func _process(delta: float) -> void:
 
 func _load_textures() -> void:
 	for i in 12:
-		var path := "res://tiles/autumn/leaves/leaf_%02d.png" % i
+		var path := "res://assets/tiles/autumn/leaves/leaf_%02d.png" % i
 		var tex: Texture2D = null
 		if ResourceLoader.exists(path):
 			tex = load(path) as Texture2D
@@ -45,7 +45,7 @@ func _load_textures() -> void:
 		if tex:
 			_textures.append(tex)
 	if _textures.is_empty():
-		push_warning("No leaf textures found under tiles/autumn/leaves/")
+		push_warning("No leaf textures found under assets/tiles/autumn/leaves/")
 
 func _spawn_leaf(scattered: bool) -> void:
 	if _textures.is_empty():
