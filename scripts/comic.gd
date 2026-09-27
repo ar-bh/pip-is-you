@@ -7,7 +7,6 @@ const COMICS: Array[String] = [
 	"res://assets/comics/comic3.png",
 	"res://assets/comics/comic4.png",
 	"res://assets/comics/comic5.png",
-	"res://assets/comics/comic6.png",
 ]
 const PARALLAX_SPEED := 12.0
 const GRID_MARGIN := 36.0
@@ -84,23 +83,30 @@ func _fit_grid(view: Vector2) -> void:
 		view.x - GRID_MARGIN * 2.0,
 		view.y - GRID_MARGIN * 2.0 - bottom_reserve,
 	)
-	var cols := 3
-	var rows := 2
-	var cell_w := (area.size.x - GRID_GAP * float(cols - 1)) / float(cols)
-	var cell_h := (area.size.y - GRID_GAP * float(rows - 1)) / float(rows)
+	var count := _panels.size()
+	if count <= 0:
+		return
+	# Prefer a 3-wide top row; leftover panels center on the next row.
+	var cols := 3 if count > 2 else count
+	var rows := int(ceil(float(count) / float(cols)))
+	var cell_w := (area.size.x - GRID_GAP * float(maxi(cols - 1, 0))) / float(cols)
+	var cell_h := (area.size.y - GRID_GAP * float(maxi(rows - 1, 0))) / float(maxi(rows, 1))
 	var cell := minf(cell_w, cell_h)
-	var grid_w := cell * float(cols) + GRID_GAP * float(cols - 1)
-	var grid_h := cell * float(rows) + GRID_GAP * float(rows - 1)
+	var grid_w := cell * float(cols) + GRID_GAP * float(maxi(cols - 1, 0))
+	var grid_h := cell * float(rows) + GRID_GAP * float(maxi(rows - 1, 0))
 	var origin := Vector2(
 		area.position.x + (area.size.x - grid_w) * 0.5,
 		area.position.y + (area.size.y - grid_h) * 0.5,
 	)
-	for i in _panels.size():
-		var col := i % cols
+	for i in count:
 		var row := int(i / cols)
-		_panels[i].position = origin + Vector2(
-			float(col) * (cell + GRID_GAP),
-			float(row) * (cell + GRID_GAP),
+		var col_in_row := i % cols
+		var panels_in_row := mini(cols, count - row * cols)
+		var row_w := cell * float(panels_in_row) + GRID_GAP * float(maxi(panels_in_row - 1, 0))
+		var row_x := origin.x + (grid_w - row_w) * 0.5
+		_panels[i].position = Vector2(
+			row_x + float(col_in_row) * (cell + GRID_GAP),
+			origin.y + float(row) * (cell + GRID_GAP),
 		)
 		_panels[i].size = Vector2(cell, cell)
 

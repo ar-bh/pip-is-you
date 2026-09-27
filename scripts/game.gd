@@ -17,13 +17,22 @@ extends Node2D
 @onready var hint_btn: TextureButton = $UI/HintButtonPlate/HintButton
 @onready var hint_panel: PanelContainer = $UI/HintPanel
 @onready var hint_label: Label = $UI/HintPanel/Margin/HintLabel
-@onready var guide_label: Label = $UI/GuideLabel
+@onready var guide_plate: PanelContainer = $UI/GuidePlate
+@onready var guide_label: Label = $UI/GuidePlate/GuideLabel
 @onready var tada: AudioStreamPlayer = $Tada
+@onready var ui_layer: CanvasLayer = $UI
 
 var _index := 0
 var _level: Level
 var _guide_base_y := 0.0
 var _guide_phase := 0.0
+var _undo_hint_active := false
+var _flash: ColorRect
+var _flash_tween: Tween
+
+const _GUIDE_COLOR := Color(0.08, 0.08, 0.08, 1)
+const _UNDO_HINT_COLOR := Color(0.55, 0.28, 0.05, 1)
+const _FLASH_COLOR := Color(0.85, 0.08, 0.08, 0.55)
 
 func _ready() -> void:
 	if auto_discover_levels:
@@ -47,7 +56,22 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit_guide_ui)
 	_fit_hint_ui()
 	_fit_guide_ui()
+	_setup_flash()
 	_load_current()
+
+func _setup_flash() -> void:
+	_flash = ColorRect.new()
+	_flash.name = "NoYouFlash"
+	_flash.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_flash.color = Color(_FLASH_COLOR.r, _FLASH_COLOR.g, _FLASH_COLOR.b, 0.0)
+	_flash.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_flash.offset_left = 0.0
+	_flash.offset_top = 0.0
+	_flash.offset_right = 0.0
+	_flash.offset_bottom = 0.0
+	ui_layer.add_child(_flash)
+	# Keep under win/hint UI but above the game.
+	ui_layer.move_child(_flash, 0)
 
 func _discover_levels() -> Array[PackedScene]:
 	var found: Array[PackedScene] = []
@@ -74,7 +98,7 @@ func _process(delta: float) -> void:
 		_level.tick(delta)
 		if scenery:
 			scenery.update_tree_fade(_level.get_you_pieces(), level_host.position, delta)
-	_bob_guide(delta)
+	_update_guide(delta)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("restart"):
@@ -96,7 +120,7 @@ func _load_current() -> void:
 		next_btn.visible = false
 		hint_btn_plate.visible = false
 		hint_btn.visible = false
-		guide_label.visible = false
+		guide_plate.visible = false
 		win_panel.visible = true
 		return
 	_level = levels[_index].instantiate()
@@ -104,11 +128,15 @@ func _load_current() -> void:
 	_level.move_trail_fade_enabled = move_trail_fade_enabled
 	level_host.add_child(_level)
 	_level.won.connect(_on_level_won)
+	_level.rules_changed.connect(_on_rules_changed)
 	win_panel.visible = false
 	_refresh_hint_ui()
 	_refresh_guide_ui()
 	await get_tree().process_frame
 	_center_level()
+
+func _on_rules_changed(_text: String) -> void:
+	_refresh_guide_ui()
 
 func _refresh_hint_ui() -> void:
 	var text := ""
@@ -121,12 +149,35 @@ func _refresh_hint_ui() -> void:
 	_fit_hint_ui()
 
 func _refresh_guide_ui() -> void:
-	var text := ""
-	if _level:
-		text = _level.guide_text.strip_edges()
-	guide_label.text = text
-	guide_label.visible = not text.is_empty()
+	var was_undo_hint := _undo_hint_active
+	_undo_hint_active = false
+	if _level and is_instance_valid(_level) and not _level.has_won() and not _level.has_you():
+		_undo_hint_active = true
+		guide_label.text = "YOU has no form. press Z to undo or R to restart"
+		guide_plate.visible = true
+		guide_label.add_theme_color_override("font_color", _UNDO_HINT_COLOR)
+		guide_label.add_theme_font_size_override("font_size", 26)
+		if not was_undo_hint:
+			_flash_no_you()
+	else:
+		var text := ""
+		if _level:
+			text = _level.guide_text.strip_edges()
+		guide_label.text = text
+		guide_plate.visible = not text.is_empty()
+		guide_label.add_theme_color_override("font_color", _GUIDE_COLOR)
+		guide_label.add_theme_font_size_override("font_size", 24)
+	guide_plate.modulate = Color.WHITE
 	_fit_guide_ui()
+
+func _flash_no_you() -> void:
+	if _flash == null:
+		return
+	if _flash_tween != null and _flash_tween.is_valid():
+		_flash_tween.kill()
+	_flash.color = _FLASH_COLOR
+	_flash_tween = create_tween()
+	_flash_tween.tween_property(_flash, "color:a", 0.0, 0.45).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 
 func _toggle_hint() -> void:
 	if hint_label.text.is_empty():
@@ -148,21 +199,36 @@ func _fit_hint_ui() -> void:
 	hint_panel.position = Vector2(margin, margin + plate_size.y + 8.0)
 
 func _fit_guide_ui() -> void:
-	if guide_label == null:
+	if guide_plate == null or guide_label == null:
 		return
 	var view := get_viewport().get_visible_rect().size
+	var width := view.x - 48.0
+	guide_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	guide_label.custom_minimum_size = Vector2(width - 36.0, 0.0)
+	guide_label.size = Vector2(width - 36.0, 0.0)
 	guide_label.reset_size()
-	var size := guide_label.get_combined_minimum_size()
-	size.x = minf(maxf(size.x, 280.0), view.x - 48.0)
-	guide_label.size = size
-	_guide_base_y = view.y - size.y - 28.0
-	guide_label.position = Vector2((view.x - size.x) * 0.5, _guide_base_y)
+	var label_h := maxf(guide_label.get_minimum_size().y, guide_label.get_combined_minimum_size().y)
+	guide_label.size = Vector2(width - 36.0, label_h)
+	guide_plate.reset_size()
+	var plate_size := guide_plate.get_combined_minimum_size()
+	plate_size.x = width
+	plate_size.y = maxf(plate_size.y, label_h + 20.0)
+	guide_plate.size = plate_size
+	guide_plate.scale = Vector2(1.08, 0.94)
+	var draw_w := plate_size.x * guide_plate.scale.x
+	_guide_base_y = view.y - plate_size.y * guide_plate.scale.y - 20.0
+	guide_plate.position = Vector2((view.x - draw_w) * 0.5, _guide_base_y)
 
-func _bob_guide(delta: float) -> void:
-	if guide_label == null or not guide_label.visible:
+func _update_guide(delta: float) -> void:
+	if guide_plate == null or not guide_plate.visible:
 		return
 	_guide_phase += delta * 2.2
-	guide_label.position.y = _guide_base_y + sin(_guide_phase) * 4.0
+	guide_plate.position.y = _guide_base_y + sin(_guide_phase) * 3.0
+	if _undo_hint_active:
+		var pulse := 0.88 + 0.12 * (0.5 + 0.5 * sin(_guide_phase * 2.4))
+		guide_plate.modulate = Color(pulse, pulse, pulse, 1.0)
+	else:
+		guide_plate.modulate = Color.WHITE
 
 func _center_level() -> void:
 	if _level == null or not is_instance_valid(_level):
@@ -175,7 +241,6 @@ func _center_level() -> void:
 	level_host.position = ((view - board_size) * 0.5).floor()
 	if scenery:
 		var blocked: Array[Vector2] = []
-		# Keep whole tree canopies clear of puzzle tiles (words, walls, etc.).
 		var cell_r := float(board.cell_size) * 0.75
 		for piece in _level.pieces:
 			blocked.append(level_host.position + piece.position)
@@ -206,7 +271,7 @@ func _on_level_won() -> void:
 	hint_panel.visible = false
 	hint_btn_plate.visible = false
 	hint_btn.visible = false
-	guide_label.visible = false
+	guide_plate.visible = false
 	win_art.visible = true
 	next_btn.visible = _index + 1 < levels.size()
 	win_panel.visible = true

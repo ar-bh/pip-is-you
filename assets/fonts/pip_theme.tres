@@ -1,11 +1,11 @@
-[gd_resource type="Theme" format=3 uid="uid://dig6aq312yfq0"]
+[gd_resource type="Theme" format=3 uid="uid://bjrppj5qkscf5"]
 
-[ext_resource type="FontFile" uid="uid://dmykv0uwg8xao" path="res://assets/fonts/fredoka.ttf" id="1_fredoka"]
+[ext_resource type="FontFile" uid="uid://ymos23ctxjbx" path="res://assets/fonts/comicneue.ttf" id="1_comic"]
 
 [resource]
-default_font = ExtResource("1_fredoka")
+default_font = ExtResource("1_comic")
 default_font_size = 24
 Button/font_sizes/font_size = 22
-Button/fonts/font = ExtResource("1_fredoka")
+Button/fonts/font = ExtResource("1_comic")
 Label/font_sizes/font_size = 24
-Label/fonts/font = ExtResource("1_fredoka")
+Label/fonts/font = ExtResource("1_comic")

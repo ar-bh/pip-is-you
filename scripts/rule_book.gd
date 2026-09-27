@@ -17,6 +17,9 @@ func has_property(noun: StringName, property: StringName) -> bool:
 func piece_has(piece: Piece, property: StringName) -> bool:
 	if piece.is_text:
 		return property == &"push"
+	# Acorn is always the goal — no ACORN IS WIN needed.
+	if piece.id == &"acorn" and property == &"win":
+		return true
 	if piece.id == &"acorn" and property == &"push" and not has_property(&"acorn", &"you"):
 		return true
 	# Bushes are pushable unless BUSH IS STOP (or YOU) is active.
@@ -88,7 +91,8 @@ func _property_at(by_cell: Dictionary, cell: Vector2i) -> Piece:
 	if not by_cell.has(cell):
 		return null
 	for piece: Piece in by_cell[cell]:
-		if piece.id in [&"you", &"win", &"stop", &"push"]:
+		# WIN is not a rule word anymore — acorn is always the goal.
+		if piece.id in [&"you", &"stop", &"push"]:
 			return piece
 	return null
 

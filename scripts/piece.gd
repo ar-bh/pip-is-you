@@ -43,7 +43,7 @@ const SPRITES := {
 	"wall|1": preload("res://assets/tiles/wall_text.png"),
 }
 
-const UI_FONT := preload("res://assets/fonts/fredoka.ttf")
+const UI_FONT := preload("res://assets/fonts/comicneue.ttf")
 const PIP_RIGHT := preload("res://assets/tiles/pip_right.png")
 const PIP_DOWN := preload("res://assets/tiles/pip_down.png")
 const PIP_UP := preload("res://assets/tiles/pip_up.png")

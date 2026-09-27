@@ -13,7 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://cmqymg2k1w441" path="res://assets/acorn_found.png" id="11_found"]
 [ext_resource type="Texture2D" uid="uid://dnwvqv2o3skpr" path="res://assets/next_text.png" id="12_next"]
 [ext_resource type="Texture2D" uid="uid://d3u5ggipvybpn" path="res://assets/hint_text.png" id="13_hint"]
-[ext_resource type="FontFile" uid="uid://dmykv0uwg8xao" path="res://assets/fonts/fredoka.ttf" id="14_font"]
+[ext_resource type="FontFile" uid="uid://ymos23ctxjbx" path="res://assets/fonts/comicneue.ttf" id="14_font"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_grass"]
 shader = ExtResource("6_wind")
@@ -73,6 +73,22 @@ corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_guide"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.2, 0.2, 0.2, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [node name="Game" type="Node2D" unique_id=1750562841]
 script = ExtResource("1_game")
@@ -151,16 +167,19 @@ theme_override_fonts/font = ExtResource("14_font")
 theme_override_font_sizes/font_size = 24
 autowrap_mode = 3
 
-[node name="GuideLabel" type="Label" parent="UI" unique_id=1753952770]
-offset_left = 200.0
+[node name="GuidePlate" type="PanelContainer" parent="UI"]
+offset_left = 40.0
 offset_top = 560.0
-offset_right = 760.0
+offset_right = 920.0
 offset_bottom = 620.0
-theme_override_colors/font_color = Color(0.98, 0.94, 0.86, 1)
-theme_override_colors/font_outline_color = Color(0.22, 0.12, 0.08, 0.85)
-theme_override_constants/outline_size = 6
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_guide")
+
+[node name="GuideLabel" type="Label" parent="UI/GuidePlate"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.08, 0.08, 0.08, 1)
 theme_override_fonts/font = ExtResource("14_font")
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3

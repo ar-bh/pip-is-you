@@ -247,6 +247,9 @@ func _pieces_at(cell: Vector2i) -> Array[Piece]:
 func get_you_pieces() -> Array[Piece]:
 	return _yous()
 
+func has_you() -> bool:
+	return not _yous().is_empty()
+
 func _yous() -> Array[Piece]:
 	var found: Array[Piece] = []
 	for piece in pieces:
@@ -258,13 +261,16 @@ func _refresh_rules() -> void:
 	rules.rebuild(pieces)
 
 func _check_win() -> void:
+	# Pip must stand next to an acorn (YOU no longer matters for winning).
 	var dirs: Array[Vector2i] = [
 		Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT,
 	]
-	for you in _yous():
+	for piece in pieces:
+		if piece.is_text or piece.id != &"pip":
+			continue
 		for dir in dirs:
-			for piece in _pieces_at(you.cell + dir):
-				if rules.piece_has(piece, &"win"):
+			for other in _pieces_at(piece.cell + dir):
+				if not other.is_text and other.id == &"acorn":
 					_won = true
 					won.emit()
 					return

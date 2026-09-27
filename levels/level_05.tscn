@@ -6,8 +6,8 @@
 
 [node name="Level04" type="Node2D" unique_id=2126305567]
 script = ExtResource("1_07l6b")
-hint_text = "make BUSH IS YOU to move it out of the way, than build the ACORN IS WIN and collect it"
-guide_text = "how can we move the bush"
+hint_text = "BUSH IS YOU, move it, then get Pip to the acorn"
+guide_text = "YOU can be a bush too"
 
 [node name="Board" type="Node2D" parent="." unique_id=648545739]
 script = ExtResource("2_ecwps")
